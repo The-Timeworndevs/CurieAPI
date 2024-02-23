@@ -1,0 +1,46 @@
+{
+	"schemaVersion": 1,
+	"id": "quantum",
+	"version": "${version}",
+	"name": "Quantum",
+	"description": "Well...",
+	"authors": [
+		"timeworndevs"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/quantum/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.timeworndevs.quantum.Quantum"
+		],
+		"fabric-datagen": [
+			"net.timeworndevs.quantum.QuantumDataGenerator"
+		],
+		"client": [
+			{
+				"value": "net.timeworndevs.quantum.QuantumClient"
+			}
+		],
+		"terrablender": [
+			"net.timeworndevs.quantum.world.biome.ModTerrablenderAPI"
+		]
+	},
+	"mixins": [
+		"quantum.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*",
+		"terrablender": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
