@@ -1,0 +1,46 @@
+{
+	"schemaVersion": 1,
+	"id": "quantumadds",
+	"version": "${version}",
+	"name": "QuantumAdds",
+	"description": "Well...",
+	"authors": [
+		"timeworndevs"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/quantumadds/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.timeworndevs.quantumadds.Quantum"
+		],
+		"fabric-datagen": [
+			"net.timeworndevs.quantumadds.QuantumDataGenerator"
+		],
+		"client": [
+			{
+				"value": "net.timeworndevs.quantumadds.QuantumClient"
+			}
+		],
+		"terrablender": [
+			"net.timeworndevs.quantumadds.world.biome.ModTerrablenderAPI"
+		]
+	},
+	"mixins": [
+		"quantumadds.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*",
+		"terrablender": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
