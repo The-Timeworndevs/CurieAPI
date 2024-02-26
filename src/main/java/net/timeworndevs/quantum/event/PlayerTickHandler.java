@@ -1,5 +1,6 @@
 package net.timeworndevs.quantum.event;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -80,81 +81,82 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
         //loop trough jsons and check biome, correct radiation level and radiation type... instead of blindly hard coding that
         int radiationFromItems = 0;
         int radiationAround = 0;
-        for (JsonElement element : Quantum.radiation_data.get("biomes")) {
+        if (Quantum.radiation_data!=null) {
+            for (String key : Quantum.radiation_data.keySet()) {
+                JsonObject curr = Quantum.radiation_data.get(key);
+
+                if (curr.has("biomes")) {
+                    for (JsonElement element : curr.get("biomes").getAsJsonArray()) {
+                        if (Objects.equals(biome, element.getAsJsonObject().get("object").getAsString())) {
+                            biomeMultiplier += element.getAsJsonObject().get(kind).getAsInt();
+                        }
+                        //loop trough jsons and check block, correct radiation level and radiation type... instead of blindly hard coding that
+
+                    }
+                }
+
+                if (curr.has("blocks")) {
+                    for (JsonElement element : curr.get("blocks").getAsJsonArray()) {
+                        if (!Objects.equals(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
+                            radiationAround += element.getAsJsonObject().get(kind).getAsInt() * BlockPos.stream(player.getBoundingBox().expand(10))
+                                    .map(world::getBlockState).filter(state -> state.isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())))).toArray().length;
+                        }
+                    }
+                }
 
 
-            if (Objects.equals(biome, element.getAsJsonObject().get("object").getAsString())) {
-                biomeMultiplier += element.getAsJsonObject().get(kind).getAsInt();
-            }
-            //loop trough jsons and check block, correct radiation level and radiation type... instead of blindly hard coding that
+                if (curr.has("items")) {
+                    for (JsonElement element : curr.get("items").getAsJsonArray()) {
+                        if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
+                            for (int i = 0; i < player.getInventory().size(); i++) {
 
-        }
-
-        for (JsonElement element: Quantum.radiation_data.get("blocks")) {
-            if (!Objects.equals(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
-                radiationAround += element.getAsJsonObject().get(kind).getAsInt() * BlockPos.stream(player.getBoundingBox().expand(10))
-                        .map(world::getBlockState).filter(state -> state.isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())))).toArray().length;
-            }
-        }
-
-
-        for (JsonElement element : Quantum.radiation_data.get("items")) {
-            if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
-                for (int i = 0; i < player.getInventory().size(); i++) {
-
-                    if ( Registries.ITEM.get(new Identifier(element.getAsJsonObject().get("object").getAsString())) == player.getInventory().getStack(i).getItem() ){
-                        radiationFromItems += element.getAsJsonObject().get(kind).getAsInt() * player.getInventory().getStack(i).getCount();
+                                if (Registries.ITEM.get(new Identifier(element.getAsJsonObject().get("object").getAsString())) == player.getInventory().getStack(i).getItem()) {
+                                    radiationFromItems += element.getAsJsonObject().get(kind).getAsInt() * player.getInventory().getStack(i).getCount();
+                                }
+                            }
+                        }
                     }
                 }
             }
-
         }
+
 
         return radiationAround+radiationFromItems+biomeMultiplier;
     }
     public static double calculateDivision(ServerPlayerEntity player, String kind) {
         double radiationDivision = 1; //blocked %. RADIATION/THIS INT
 
-        for (JsonElement element: Quantum.radiation_data.get("inductors")) {
-            if (!Objects.equals(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
-                radiationDivision += element.getAsJsonObject().get(kind).getAsDouble() * BlockPos.stream(player.getBoundingBox().expand(10))
-                        .map(((ServerWorld) player.getWorld())::getBlockState).filter(state -> state.isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())))).toArray().length;
-            }
-        }
+        if (Quantum.radiation_data!=null) {
+            for (String key : Quantum.radiation_data.keySet()) {
+                JsonObject curr = Quantum.radiation_data.get(key);
 
-
-        for (JsonElement element: Quantum.radiation_data.get("armor")) {
-            for (String part: new String[]{"boots", "leggings", "chestplate", "helmet"}) {
-                if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString())).toString(), "minecraft:air")) {
-                    for(int i=0; i<4;i++) {
-                        if( player.getInventory().armor.get(i).getItem()==Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString()))) {
-                            radiationDivision += element.getAsJsonObject().get(kind).getAsDouble();
+                if (curr.has("insulators")) {
+                    for (JsonElement element : curr.get("insulators").getAsJsonArray()) {
+                        if (!Objects.equals(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
+                            radiationDivision += element.getAsJsonObject().get(kind).getAsDouble() * BlockPos.stream(player.getBoundingBox().expand(10))
+                                    .map(((ServerWorld) player.getWorld())::getBlockState).filter(state -> state.isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())))).toArray().length;
                         }
                     }
+                }
+
+                if (curr.has("armor")) {
+                    for (JsonElement element : curr.get("armor").getAsJsonArray()) {
+                        for (String part : new String[]{"boots", "leggings", "chestplate", "helmet"}) {
+                            if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString())).toString(), "minecraft:air")) {
+                                for (int i = 0; i < 4; i++) {
+                                    if (player.getInventory().armor.get(i).getItem() == Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString()))) {
+                                        radiationDivision += element.getAsJsonObject().get(kind).getAsDouble();
+                                    }
+                                }
 
 
+                            }
+                        }
+                    }
                 }
             }
-
         }
-        /*Item[] hazmatd_armor = {ModItems.HAZMATD_BOOTS, ModItems.HAZMATD_LEGGINGS, ModItems.HAZMATD_CHESTPLATE, ModItems.HAZMATD_HELMET};
-        Item[] hazmatc_armor = {ModItems.HAZMATC_BOOTS, ModItems.HAZMATC_LEGGINGS, ModItems.HAZMATC_CHESTPLATE, ModItems.HAZMATC_HELMET};
-        Item[] hazmatb_armor = {ModItems.HAZMATB_BOOTS, ModItems.HAZMATB_LEGGINGS, ModItems.HAZMATB_CHESTPLATE, ModItems.HAZMATB_HELMET};
-        Item[] hazmata_armor = {ModItems.HAZMATA_BOOTS, ModItems.HAZMATA_LEGGINGS, ModItems.HAZMATA_CHESTPLATE, ModItems.HAZMATA_HELMET};
-        for (int i=0; i<4; i++) {
-            if (player.getInventory().armor.get(i).getItem()==hazmatd_armor[i]) {
-                radiationDivision+=0.33;
-            }
-            if (player.getInventory().armor.get(i).getItem()==hazmatc_armor[i]) {
-                radiationDivision+=0.5;
-            }
-            if (player.getInventory().armor.get(i).getItem()==hazmatb_armor[i]) {
-                radiationDivision+=0.75;
-            }
-            if (player.getInventory().armor.get(i).getItem()==hazmata_armor[i]) {
-                radiationDivision+=1;
-            }
-        }*/
+
         return radiationDivision;
     }
 }

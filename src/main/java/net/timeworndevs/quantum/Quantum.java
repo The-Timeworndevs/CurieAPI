@@ -1,8 +1,6 @@
 package net.timeworndevs.quantum;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -11,9 +9,13 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
 import net.timeworndevs.quantum.block.ModBlocks;
 import net.timeworndevs.quantum.event.KeyInputHandler;
 import net.timeworndevs.quantum.event.PlayerTickHandler;
@@ -33,13 +35,18 @@ import net.timeworndevs.quantum.util.ParseJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Array;
 import java.util.*;
 
 import static net.minecraft.server.command.CommandManager.*;
 
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Quantum implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -83,10 +90,46 @@ public class Quantum implements ModInitializer {
         };
         data.forEach(read);
     }*/
-    public static Map<String, JsonArray> radiation_data;
+    public static HashMap<String, JsonObject> radiation_data;
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
     @Override
     public void onInitialize() {
+
+        Set<String> files;
+        try {
+            Files.createDirectories(Paths.get(FabricLoader.getInstance().getConfigDir() + "/curie"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try (Stream<Path> stream = Files.list(Paths.get(FabricLoader.getInstance().getConfigDir() + "/curie"))) {
+            files = stream.filter(file -> !Files.isDirectory(file))
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        LOGGER.error(String.valueOf(files));
+
+        for (int i=0; i<files.size(); i++) {
+            File file =  new File(FabricLoader.getInstance().getConfigDir() + "/curie/" + files.toArray()[i]);
+            if (file.exists()) {
+                BufferedReader br = null;
+                try {
+                    br = new BufferedReader(new FileReader(file));
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                JsonObject json = JsonParser.parseReader(br).getAsJsonObject();
+                if (null==radiation_data) {
+                    radiation_data =new HashMap<>();
+                }
+                radiation_data.put(file.getName(), json);
+
+            }
+        }
+
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("clearrad")
                 .requires(source -> source.hasPermissionLevel(2))
                 .executes(context -> {
@@ -98,11 +141,12 @@ public class Quantum implements ModInitializer {
                     ClientPlayNetworking.send(ModMessages.CLEAR_GAMMA_ID, PacketByteBufs.create());
                     return 1;
                 })));
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener((new SimpleSynchronousResourceReloadListener() {
+        /*ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener((new SimpleSynchronousResourceReloadListener() {
             @Override
             public Identifier getFabricId() {
                 return new Identifier("tutorial", "my_resources");
             }
+
 
             @Override
             public void reload(ResourceManager manager) {
@@ -122,7 +166,7 @@ public class Quantum implements ModInitializer {
                 };
                 data.forEach(read);
             }
-        }));
+        }));*/
 
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         // However, some things (like resources) may still be uninitialized.

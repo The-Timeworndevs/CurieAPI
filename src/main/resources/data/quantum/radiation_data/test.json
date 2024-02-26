@@ -53,6 +53,12 @@
   ],
   "blocks": [
     {
+      "object": "minecraft:grass_block",
+      "alpha": "50",
+      "beta": "50",
+      "gamma": "50"
+    },
+    {
       "object": "quantum:nuclear_waste",
       "alpha": "2",
       "beta": "3",
