@@ -25,9 +25,6 @@
 			{
 				"value": "net.timeworndevs.quantum.QuantumClient"
 			}
-		],
-		"terrablender": [
-			"net.timeworndevs.quantum.world.biome.ModTerrablenderAPI"
 		]
 	},
 	"mixins": [

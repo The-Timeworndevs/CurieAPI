@@ -6,10 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.timeworndevs.quantum.block.ModBlocks;
 import net.timeworndevs.quantum.event.PlayerTickHandler;
-import net.timeworndevs.quantum.item.ModItems;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
 import net.timeworndevs.quantum.util.RadiationData;
 
