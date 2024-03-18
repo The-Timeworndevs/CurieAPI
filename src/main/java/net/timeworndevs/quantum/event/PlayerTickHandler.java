@@ -41,6 +41,7 @@ import org.joml.Vector3fc;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
     private int tick = 0;
@@ -156,6 +157,33 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
         return radiationAround+radiationFromItems+biomeMultiplier;
     }
+    private static void doRaycast(ServerPlayerEntity player, String kind, BlockPos blockPos, Block block) {
+//        Quantum.LOGGER.info(String.valueOf(player.getWorld().getBlockState(blockPos).getBlock().getName()));
+        Vec3d start, end;
+
+        start = player.getPos();
+        end = (blockPos).toCenterPos();
+
+        Quantum.LOGGER.info(String.valueOf(start));
+        Quantum.LOGGER.info(String.valueOf(end));
+//        Quantum.LOGGER.info(String.valueOf(blockPos));
+
+        RaycastContext.ShapeType blockContext;
+
+        blockContext = RaycastContext.ShapeType.COLLIDER;
+
+
+        RaycastContext.FluidHandling fluidContext;
+
+        fluidContext = RaycastContext.FluidHandling.NONE;
+
+
+        BlockHitResult result = player.getWorld().raycast(new RaycastContext(start, end, blockContext, fluidContext, new MarkerEntity(EntityType.MARKER, player.getWorld())));//new RaycastContext(start, end, blockContext, fluidContext, new Marker(EntityType.MARKER, player.getWorld())));
+
+        Quantum.LOGGER.info(String.valueOf(player.getWorld().getBlockState(result.getBlockPos()).getBlock().getName()));
+        Quantum.LOGGER.info(String.valueOf(result.getBlockPos()));
+    }
+
     public static double calculateDivision(ServerPlayerEntity player, String kind) {
         double radiationDivision = 1; //blocked %. RADIATION/THIS INT
 
@@ -167,38 +195,10 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     for (JsonElement element : curr.get("blocks").getAsJsonArray()) {
                         if (!Objects.equals(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
                             if (element.getAsJsonObject().has(kind)) {
-
-                                Quantum.LOGGER.info(String.valueOf(BlockPos.stream(player.getBoundingBox().expand(10)).toArray().length));
-                                for (Object i: BlockPos.stream(player.getBoundingBox().expand(10)).toArray()) {
-                                    if (!player.getWorld().getBlockState((BlockPos) i).isAir()) {
-                                        Quantum.LOGGER.info("WOA");
-                                    }
-                                    if (player.getWorld().getBlockState((BlockPos) i).isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())))) {
-
-                                        Vec3d start, end;
-
-                                        start = player.getPos();
-                                        end = ((BlockPos) i).toCenterPos();
-
-                                        Quantum.LOGGER.info(String.valueOf(start));
-                                        Quantum.LOGGER.info(String.valueOf(end));
-
-
-                                        RaycastContext.ShapeType blockContext;
-
-                                        blockContext = RaycastContext.ShapeType.COLLIDER;
-
-
-                                        RaycastContext.FluidHandling fluidContext;
-
-                                        fluidContext = RaycastContext.FluidHandling.NONE;
-
-
-                                        BlockHitResult result = player.getWorld().raycast(new RaycastContext(start, end, blockContext, fluidContext, new MarkerEntity(EntityType.MARKER, player.getWorld())));//new RaycastContext(start, end, blockContext, fluidContext, new Marker(EntityType.MARKER, player.getWorld())));
-
-                                    Quantum.LOGGER.info(String.valueOf(result.getBlockPos()));
-                                    }
-                                }
+                                Stream<BlockPos> blockPosStream = BlockPos.stream(player.getBoundingBox().expand(5))
+                                        .filter(blockPos -> player.getWorld().getBlockState(blockPos).isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString()))));
+                                blockPosStream.forEach(blockPos -> doRaycast(player, kind, blockPos,(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString()))) ));
+//
                             }
                         }
                     }
