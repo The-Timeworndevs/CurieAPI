@@ -1,7 +1,5 @@
 package net.timeworndevs.quantum.networking;
 
-import it.unimi.dsi.fastutil.Function;
-import it.unimi.dsi.fastutil.Hash;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -16,12 +14,10 @@ import net.minecraft.util.Identifier;
 import net.timeworndevs.quantum.Quantum;
 import net.timeworndevs.quantum.event.PlayerTickHandler;
 import net.timeworndevs.quantum.networking.packet.*;
-import net.timeworndevs.quantum.networking.packet.clear.*;
 import net.timeworndevs.quantum.util.Clamp;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
 import net.timeworndevs.quantum.util.RadiationData;
 
-import java.sql.Array;
 import java.util.HashMap;
 
 public class ModMessages {
@@ -78,7 +74,9 @@ public class ModMessages {
         }
         public void receive(MinecraftClient client, ClientPlayNetworkHandler handler,
                                    PacketByteBuf buf, PacketSender responseSender) {
-            ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation." + this.radiation_type, buf.readInt());
+            if (client.player != null) {
+                ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation." + this.radiation_type, buf.readInt());
+            }
         }
     }
     public static final Identifier ALPHA_ID = new Identifier(Quantum.MOD_ID, "radiation_alpha");

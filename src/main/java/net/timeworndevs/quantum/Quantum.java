@@ -2,7 +2,10 @@ package net.timeworndevs.quantum;
 
 import com.google.gson.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.timeworndevs.quantum.event.PlayerConnectionHelper;
+import net.timeworndevs.quantum.event.PlayerDisconnectionHelper;
 import net.timeworndevs.quantum.event.PlayerTickHandler;
 import net.timeworndevs.quantum.networking.ModMessages;
 import net.fabricmc.api.ModInitializer;
@@ -120,6 +123,8 @@ public class Quantum implements ModInitializer {
 
         ModMessages.registerC2SPackets();
         ServerTickEvents.START_SERVER_TICK.register(new PlayerTickHandler());
+        ServerPlayConnectionEvents.JOIN.register(new PlayerConnectionHelper());
+        ServerPlayConnectionEvents.DISCONNECT.register(new PlayerDisconnectionHelper());
         LOGGER.info("Wormhole established!");
     }
 }

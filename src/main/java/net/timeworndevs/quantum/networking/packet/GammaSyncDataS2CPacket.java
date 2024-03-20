@@ -11,6 +11,8 @@ public class GammaSyncDataS2CPacket {
                                PacketByteBuf buf, PacketSender responseSender) {
         //only on client thingies
 
-        ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation.gamma", buf.readInt());
+        if (client.player != null) {
+            ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation.gamma", buf.readInt());
+        }
     }
 }
