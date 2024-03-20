@@ -13,7 +13,7 @@ public class RadiationData {
     public static void addRad(IEntityDataSaver player, String kind, int amount) {
         NbtCompound nbt = player.getPersistentData();
         int rad = nbt.getInt("radiation."+kind);
-        if(rad + amount >= 1000) {
+        if(rad + amount >= 10000) {
             rad = 1000;
         } else {
             rad += amount;

@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.MarkerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -20,6 +21,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockStateRaycastContext;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.LightType;
+import net.minecraft.world.chunk.light.LightingProvider;
 import net.timeworndevs.quantum.Quantum;
 import net.minecraft.world.RaycastContext;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
@@ -92,11 +95,11 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
     public static int calculateRadiation(ServerWorld world, ServerPlayerEntity player, String kind) {
         int biomeMultiplier = 0;
         String biome = world.getBiome(player.getBlockPos()).getKey().toString().replace("Optional[ResourceKey[minecraft:worldgen/biome / ", "").replace("]]", ""); // I'm the worst dev hello there for doing that
-
+        LightingProvider lighting = world.getLightingProvider();
         //loop trough jsons and check biome, correct radiation level and radiation type... instead of blindly hard coding that
         int radiationFromItems = 0;
         int radiationAround = 0;
-        double armorProtection = 0;
+        float armorProtection = 0;
         if (Quantum.radiation_data!=null) {
             for (String key : Quantum.radiation_data.keySet()) {
                 JsonObject curr = Quantum.radiation_data.get(key);
@@ -112,6 +115,8 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
                     }
                 }
+
+                biomeMultiplier = biomeMultiplier * (lighting.get(LightType.SKY).getLightLevel(player.getBlockPos()) / 15);
 
                 radiationAround += calculateBlockRadiation(player, kind);
                 //Quantum.LOGGER.info(kind + radiationAround);
@@ -131,16 +136,17 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                         }
                     }
                 }
+                HashMap<String, EquipmentSlot> armorPieces = new HashMap<>();
+                armorPieces.put("helmet", EquipmentSlot.HEAD);
+                armorPieces.put("chestplate", EquipmentSlot.CHEST);
+                armorPieces.put("leggings", EquipmentSlot.LEGS);
+                armorPieces.put("boots", EquipmentSlot.FEET);
                 if (curr.has("armor")) {
                     for (JsonElement element : curr.get("armor").getAsJsonArray()) {
-                        for (String part : new String[]{"boots", "leggings", "chestplate", "helmet"}) {
-                            if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString())).toString(), "minecraft:air")) {
-                                for (int i = 0; i < 4; i++) {
-                                    if (player.getInventory().armor.get(i).getItem() == Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString()))) {
-                                        if (element.getAsJsonObject().has(kind)) {
-                                            armorProtection += element.getAsJsonObject().get(kind).getAsDouble();
-                                        }
-                                    }
+                        for (String part : armorPieces.keySet()) {
+                            if (player.getEquippedStack(armorPieces.get(part)).getItem().equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsJsonObject().get("item").getAsString())))) {
+                                if (element.getAsJsonObject().has(kind)) {
+                                    armorProtection += element.getAsJsonObject().get(kind).getAsFloat() * element.getAsJsonObject().get(part).getAsJsonObject().get("multiplier").getAsFloat();
                                 }
                             }
                         }
@@ -150,7 +156,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
         }
 
 
-        return (int) (radiationAround+radiationFromItems+biomeMultiplier * ((100 - Math.min(armorProtection, 100))/100) );
+        return Math.round((radiationAround+radiationFromItems+biomeMultiplier) * ((100 - Math.min(armorProtection, 100))/100) );
     }
 
     private static BlockHitResult raycastInsulator(RaycastContext context, Predicate<BlockState> statePredicate, BlockPos ignored, ServerPlayerEntity player) {
@@ -178,7 +184,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
         int total_insulation = 0;
         Vec3d start, end;
 
-        start = player.getPos();
+        start = player.getPos().add(0.0, 0.1, 0.0);
         end = (blockPos).toCenterPos();
 
         //Find list of insulators from configs and put into hashmap for easier use
