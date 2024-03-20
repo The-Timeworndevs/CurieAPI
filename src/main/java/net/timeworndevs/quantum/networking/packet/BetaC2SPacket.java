@@ -12,10 +12,6 @@ import net.timeworndevs.quantum.util.Clamp;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
 import net.timeworndevs.quantum.util.RadiationData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 public class BetaC2SPacket {
     public static void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler,
                                PacketByteBuf buf, PacketSender responseSender) {

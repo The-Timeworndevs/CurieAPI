@@ -12,6 +12,8 @@ public class AlphaSyncDataS2CPacket {
                                PacketByteBuf buf, PacketSender responseSender) {
         //only on client thingies
 
-        ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation.alpha", buf.readInt());
+        if (client.player != null) {
+            ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation.alpha", buf.readInt());
+        }
     }
 }
