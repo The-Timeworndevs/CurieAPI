@@ -3,23 +3,18 @@ package net.timeworndevs.quantum.event;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.MarkerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockStateRaycastContext;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.light.LightingProvider;
@@ -27,7 +22,6 @@ import net.timeworndevs.quantum.Quantum;
 import net.minecraft.world.RaycastContext;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
 import net.timeworndevs.quantum.util.RadiationData;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -119,7 +113,6 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                 biomeMultiplier = biomeMultiplier * (lighting.get(LightType.SKY).getLightLevel(player.getBlockPos()) / 15);
 
                 radiationAround += calculateBlockRadiation(player, kind);
-                //Quantum.LOGGER.info(kind + radiationAround);
 
 
                 if (curr.has("items")) {
@@ -180,7 +173,6 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
     }
 
     private static int calculateInsulators(ServerPlayerEntity player, String kind, BlockPos blockPos) {
-//        Quantum.LOGGER.info(String.valueOf(player.getWorld().getBlockState(blockPos).getBlock().getName()));
         int total_insulation = 0;
         Vec3d start, end;
 
@@ -201,7 +193,6 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                 }
             }
         }
-//        Quantum.LOGGER.info(insulators.toString());
 
 
         boolean reachedEnd = false;
@@ -249,60 +240,6 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
             }
         }
         return radiation;
-    }
-
-    // Calculates the amount of insulation provided for a type of radiation
-    public static double calculateDivision(ServerPlayerEntity player, String kind) {
-        double radiationDivision = 1; //blocked %. RADIATION/THIS INT
-
-        if (Quantum.radiation_data!=null) {
-            for (String key : Quantum.radiation_data.keySet()) {
-                JsonObject curr = Quantum.radiation_data.get(key);
-
-//                if (curr.has("blocks")) {
-//                    for (JsonElement element : curr.get("blocks").getAsJsonArray()) {
-//                        if (!Objects.equals(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
-//                            if (element.getAsJsonObject().has(kind)) {
-//                                Stream<BlockPos> blockPosStream = BlockPos.stream(player.getBoundingBox().expand(5))
-//                                        .filter(blockPos -> player.getWorld().getBlockState(blockPos).isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString()))));
-//                                blockPosStream.forEach(blockPos -> calculateInsulators(player, kind, blockPos ));
-////
-//                            }
-//                        }
-//                    }
-//                }
-                    /*for (JsonElement element : curr.get("insulators").getAsJsonArray()) {
-                        if (!Objects.equals(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
-                            if (element.getAsJsonObject().has(kind)) {
-
-                                radiationDivision += element.getAsJsonObject().get(kind).getAsDouble() * BlockPos.stream(player.getBoundingBox().expand(10))
-                                        .map(((ServerWorld) player.getWorld())::getBlockState).filter(state -> state.isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString())))).toArray().length;
-                            }
-                        }
-                    }*/
-
-
-                if (curr.has("armor")) {
-                    for (JsonElement element : curr.get("armor").getAsJsonArray()) {
-                        for (String part : new String[]{"boots", "leggings", "chestplate", "helmet"}) {
-                            if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString())).toString(), "minecraft:air")) {
-                                for (int i = 0; i < 4; i++) {
-                                    if (player.getInventory().armor.get(i).getItem() == Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsString()))) {
-                                        if (element.getAsJsonObject().has(kind)) {
-                                            radiationDivision += element.getAsJsonObject().get(kind).getAsDouble();
-                                        }
-                                    }
-                                }
-
-
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return radiationDivision;
     }
 
 }

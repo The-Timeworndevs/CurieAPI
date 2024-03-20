@@ -91,8 +91,6 @@ public class Quantum implements ModInitializer {
         }
 
         for (String i: new_radiation_types.keySet()) {
-            ModMessages.NEW_RADIATIONS_ID.put(new Identifier(Quantum.MOD_ID, "radiation_"+i), new ModMessages.NewPackage(i));
-            ModMessages.NEW_RADIATIONS_DEL_ID.put(new Identifier(Quantum.MOD_ID,"radiation_"+i+"_del"), new ModMessages.NewDelPackage(i));
             ModMessages.NEW_RADIATIONS_SYNC_ID.put(new Identifier(Quantum.MOD_ID, "radiation_"+i+"_sync"), new ModMessages.NewSyncPackage(i));
 
         }
@@ -121,7 +119,6 @@ public class Quantum implements ModInitializer {
         //ModRecipes.registerRecipes();
         LOGGER.info("Testing radiation...");
 
-        ModMessages.registerC2SPackets();
         ServerTickEvents.START_SERVER_TICK.register(new PlayerTickHandler());
         ServerPlayConnectionEvents.JOIN.register(new PlayerConnectionHelper());
         ServerPlayConnectionEvents.DISCONNECT.register(new PlayerDisconnectionHelper());
