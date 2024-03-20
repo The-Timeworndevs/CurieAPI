@@ -11,6 +11,8 @@ public class BetaSyncDataS2CPacket {
                                PacketByteBuf buf, PacketSender responseSender) {
         //only on client thingies
 
-        ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation.beta", buf.readInt());
+        if (client.player != null) {
+            ((IEntityDataSaver) client.player).getPersistentData().putInt("radiation.beta", buf.readInt());
+        }
     }
 }
