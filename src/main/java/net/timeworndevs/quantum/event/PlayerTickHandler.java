@@ -41,21 +41,18 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     int beta = calculateRadiation(world, player, "beta");
                     int gamma = calculateRadiation(world, player, "gamma");
                     if (alpha > 0) {
-                        Quantum.LOGGER.info("Alpha: " + alpha);
                         RadiationData.addRad((IEntityDataSaver) player, "alpha", alpha);
                     } else {
                         RadiationData.delRad((IEntityDataSaver) player, "alpha", 1);
                     }
 
                     if (beta > 0) {
-                        Quantum.LOGGER.info("Beta: " + beta);
                         RadiationData.addRad((IEntityDataSaver) player, "beta", beta);
                     } else {
                         RadiationData.delRad((IEntityDataSaver) player, "beta", 1);
                     }
 
                     if (gamma > 0) {
-                        Quantum.LOGGER.info("Gamma: " + gamma);
                         RadiationData.addRad((IEntityDataSaver) player, "gamma", gamma);
                     } else {
                         RadiationData.delRad((IEntityDataSaver) player, "gamma", 1);
@@ -64,7 +61,6 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     for (String type : Quantum.new_radiation_types.keySet()) {
                         int radData = calculateRadiation(world, player, type);
                         if (radData > 0) {
-                            Quantum.LOGGER.info(type + ": " + radData);
                             RadiationData.addRad((IEntityDataSaver) player, type, radData);
                         } else {
                             RadiationData.delRad((IEntityDataSaver) player, type, 1);
@@ -87,9 +83,9 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
     // Calculates the amount of radiation to add to the player (for a period of time) for a type of radiation
     public static int calculateRadiation(ServerWorld world, ServerPlayerEntity player, String kind) {
-        int biomeMultiplier = 0;
+        float biomeMultiplier = 0;
         String biome = world.getBiome(player.getBlockPos()).getKey().toString().replace("Optional[ResourceKey[minecraft:worldgen/biome / ", "").replace("]]", ""); // I'm the worst dev hello there for doing that
-        LightingProvider lighting = world.getLightingProvider();
+        //LightingProvider lighting = world.getLightingProvider();
         //loop trough jsons and check biome, correct radiation level and radiation type... instead of blindly hard coding that
         int radiationFromItems = 0;
         int radiationAround = 0;
@@ -109,10 +105,10 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
                     }
                 }
-
-                biomeMultiplier = biomeMultiplier * (lighting.get(LightType.SKY).getLightLevel(player.getBlockPos()) / 15);
+                biomeMultiplier = biomeMultiplier * (world.getLightLevel( LightType.SKY, player.getBlockPos()) / (float) 15);
 
                 radiationAround += calculateBlockRadiation(player, kind);
+
 
 
                 if (curr.has("items")) {
