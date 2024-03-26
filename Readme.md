@@ -1,1 +1,1 @@
-readme I completely didn't copy from my fork of toast's cook it
+someone make that ReadMe I'm bad at it :(
