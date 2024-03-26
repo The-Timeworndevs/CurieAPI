@@ -14,7 +14,7 @@ public class RadiationData {
         NbtCompound nbt = player.getPersistentData();
         int rad = nbt.getInt("radiation."+kind);
         if(rad + amount >= 10000) {
-            rad = 1000;
+            rad = 10000;
         } else {
             rad += amount;
         }
