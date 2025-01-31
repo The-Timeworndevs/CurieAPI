@@ -105,7 +105,9 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
                     }
                 }
-                biomeMultiplier = biomeMultiplier * (world.getLightLevel( LightType.SKY, player.getBlockPos()) / (float) 15);
+                if (player.getWorld().getRegistryKey().getValue().getNamespace()=="minecraft:overworld") {
+                    biomeMultiplier = biomeMultiplier * (world.getLightLevel(LightType.SKY, player.getBlockPos()) / (float) 15);
+                }
 
                 radiationAround += calculateBlockRadiation(player, kind);
 
