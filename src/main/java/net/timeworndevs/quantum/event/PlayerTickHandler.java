@@ -105,7 +105,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
                     }
                 }
-                if (player.getWorld().getRegistryKey().getValue().getNamespace()=="minecraft:overworld") {
+                if (Objects.equals(player.getWorld().getRegistryKey().getValue().getNamespace(), "minecraft:overworld")) {
                     biomeMultiplier = biomeMultiplier * (world.getLightLevel(LightType.SKY, player.getBlockPos()) / (float) 15);
                 }
 
