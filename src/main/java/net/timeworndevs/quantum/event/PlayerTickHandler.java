@@ -137,7 +137,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                         for (String part : armorPieces.keySet()) {
                             if (player.getEquippedStack(armorPieces.get(part)).getItem().equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get(part).getAsJsonObject().get("item").getAsString())))) {
                                 if (element.getAsJsonObject().has(kind)) {
-                                    armorProtection += element.getAsJsonObject().get(kind).getAsFloat() * element.getAsJsonObject().get(part).getAsJsonObject().get("multiplier").getAsFloat();
+                                    armorProtection += element.getAsJsonObject().get(kind).getAsFloat() * element.getAsJsonObject().get(part).getAsJsonObject().get("multiplier").getAsFloat() * 100;
                                 }
                             }
                         }
@@ -147,7 +147,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
         }
 
 
-        return Math.round((radiationAround+radiationFromItems+biomeMultiplier) * ((100 - Math.min(armorProtection, 100))/100) );
+        return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (((100 - Math.min(armorProtection, 100)))));
     }
 
     private static BlockHitResult raycastInsulator(RaycastContext context, Predicate<BlockState> statePredicate, BlockPos ignored, ServerPlayerEntity player) {
