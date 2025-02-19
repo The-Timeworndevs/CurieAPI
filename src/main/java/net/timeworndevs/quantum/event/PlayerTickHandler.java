@@ -147,7 +147,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
         }
 
 
-        return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (((100 - Math.min(armorProtection, 100)))));
+        return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (((100 - Math.min(armorProtection, 100)))))/4;
     }
 
     private static BlockHitResult raycastInsulator(RaycastContext context, Predicate<BlockState> statePredicate, BlockPos ignored, ServerPlayerEntity player) {
