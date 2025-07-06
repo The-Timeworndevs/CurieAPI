@@ -49,7 +49,7 @@ public class Quantum implements ModInitializer {
 
     public static HashMap<String, JsonObject> radiation_data = new HashMap<>();
     public static HashMap<String, String> new_radiation_types = new HashMap<>();
-
+    public static int cap = 100000;
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
     @Override
@@ -110,7 +110,9 @@ public class Quantum implements ModInitializer {
 
             }
         }
-
+        if (radiation_data.containsKey("cap")) {
+            cap = Quantum.radiation_data.get("cap").getAsInt();
+        }
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
