@@ -68,7 +68,7 @@ public class Quantum implements ModInitializer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        LOGGER.warn("Loading files: {}", String.valueOf(files));
+        LOGGER.warn("Loading Curie configuration from files: {}", files);
 
         for (int i=0; i<files.size(); i++) {
             File file = new File(FabricLoader.getInstance().getConfigDir() + "/curie/" + files.toArray()[i]);
@@ -110,8 +110,15 @@ public class Quantum implements ModInitializer {
 
             }
         }
-        if (radiation_data.containsKey("cap")) {
-            cap = Quantum.radiation_data.get("cap").getAsInt();
+
+        for (String key: Quantum.radiation_data.keySet()) {
+            JsonObject rad = Quantum.radiation_data.get(key);
+            if (rad.has("cap")) {
+                if (cap != 100000) {
+                    LOGGER.warn("Radiation Cap defined multiple times.");
+                }
+                cap = rad.get("cap").getAsInt();
+            }
         }
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         // However, some things (like resources) may still be uninitialized.
