@@ -105,7 +105,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
                     }
                 }
-                if (Objects.equals(player.getWorld().getRegistryKey().getValue().getNamespace(), "minecraft:overworld")) {
+                if (Objects.equals(player.getWorld().getRegistryKey().getValue().toString(), "minecraft:overworld")) {
                     biomeMultiplier = biomeMultiplier * (world.getLightLevel(LightType.SKY, player.getBlockPos()) / (float) 15);
                 }
 
@@ -115,7 +115,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
                 if (curr.has("items")) {
                     for (JsonElement element : curr.get("items").getAsJsonArray()) {
-                        if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
+                        if (!Objects.equals(Registries.ITEM.get(new Identifier(element.getAsJsonObject().get("object").getAsString())).toString(), "air")) {
                             for (int i = 0; i < player.getInventory().size(); i++) {
 
                                 if (Registries.ITEM.get(new Identifier(element.getAsJsonObject().get("object").getAsString())) == player.getInventory().getStack(i).getItem()) {
@@ -124,6 +124,8 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                                     }
                                 }
                             }
+                        } else {
+                            Quantum.LOGGER.warn("CurieAPI Config Warning: {} is not a valid item.", element.getAsJsonObject().get("object").getAsString());
                         }
                     }
                 }
@@ -222,7 +224,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
 
                 if (curr.has("blocks")) {
                     for (JsonElement element : curr.get("blocks").getAsJsonArray()) {
-                        if (!Objects.equals(Registries.BLOCK.get(new Identifier ( element.getAsJsonObject().get("object").getAsString())).toString(), "minecraft:air")) {
+                        if (!Objects.equals(Registries.BLOCK.get(new Identifier ( element.getAsJsonObject().get("object").getAsString())).toString(), "air")) {
                             if (element.getAsJsonObject().has(kind)) {
                                 Stream<BlockPos> blockPosStream = BlockPos.stream(player.getBoundingBox().expand(5))
                                         .filter(blockPos -> player.getWorld().getBlockState(blockPos).isOf(Registries.BLOCK.get(new Identifier(element.getAsJsonObject().get("object").getAsString()))));
@@ -232,6 +234,8 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                                         })
                                         .reduce(0, Integer::sum);
                             }
+                        } else {
+                            Quantum.LOGGER.warn("CurieAPI Config Warning: {} is not a valid item.", element.getAsJsonObject().get("object").getAsString());
                         }
                     }
                 }

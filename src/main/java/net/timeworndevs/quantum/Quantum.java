@@ -68,7 +68,7 @@ public class Quantum implements ModInitializer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        LOGGER.error(String.valueOf(files));
+        LOGGER.warn("Loading files: {}", String.valueOf(files));
 
         for (int i=0; i<files.size(); i++) {
             File file = new File(FabricLoader.getInstance().getConfigDir() + "/curie/" + files.toArray()[i]);
