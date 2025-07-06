@@ -50,6 +50,7 @@ public class Quantum implements ModInitializer {
     public static HashMap<String, JsonObject> radiation_data = new HashMap<>();
     public static HashMap<String, String> new_radiation_types = new HashMap<>();
     public static int cap = 100000;
+    public static int div_constant = 4;
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
     @Override
@@ -118,6 +119,12 @@ public class Quantum implements ModInitializer {
                     LOGGER.warn("Radiation Cap defined multiple times.");
                 }
                 cap = rad.get("cap").getAsInt();
+            }
+            if (rad.has("div_constant")) {
+                if (div_constant != 4) {
+                    LOGGER.warn("Div Constant was defined multiple times.");
+                }
+                div_constant = rad.get("div_constant").getAsInt();
             }
         }
         // This code runs as soon as Minecraft is in a mod-load-ready state.

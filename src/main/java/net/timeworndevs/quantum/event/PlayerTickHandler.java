@@ -57,7 +57,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     } else {
                         RadiationData.delRad((IEntityDataSaver) player, "gamma", 1);
                     }
-
+                    Quantum.LOGGER.warn(String.valueOf(((IEntityDataSaver) player).getPersistentData().get("radiation.alpha")));
                     for (String type : Quantum.new_radiation_types.keySet()) {
                         int radData = calculateRadiation(world, player, type);
                         if (radData > 0) {
@@ -149,7 +149,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
         }
 
 
-        return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (((100 - Math.min(armorProtection, 100)))))/4;
+        return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (((100 - Math.min(armorProtection, 100)))))/Quantum.div_constant;
     }
 
     private static BlockHitResult raycastInsulator(RaycastContext context, Predicate<BlockState> statePredicate, BlockPos ignored, ServerPlayerEntity player) {
