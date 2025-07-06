@@ -22,6 +22,8 @@ public abstract class ModEntityDataSaverMixin implements IEntityDataSaver {
         return persistentData;
     }
 
+    /* GENUINELY IDFK WHAT THAT IS :sob:
+
     @Inject(method="writeNbt", at = @At("HEAD"))
     protected void injectWriteMethod(NbtCompound nbt, CallbackInfoReturnable info) {
         if (persistentData!=null) {
@@ -34,5 +36,5 @@ public abstract class ModEntityDataSaverMixin implements IEntityDataSaver {
         if (nbt.contains(Quantum.MOD_ID+".fok_data", 10)) {
             persistentData = nbt.getCompound(Quantum.MOD_ID + ".fok_data");
         }
-    }
+    }*/
 }
