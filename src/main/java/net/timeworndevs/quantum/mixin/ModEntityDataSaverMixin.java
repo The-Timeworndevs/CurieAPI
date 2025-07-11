@@ -1,22 +1,19 @@
 package net.timeworndevs.quantum.mixin;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.timeworndevs.quantum.Quantum;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(Entity.class)
+@Mixin(LivingEntity.class)
 public abstract class ModEntityDataSaverMixin implements IEntityDataSaver {
+    @Unique
     private NbtCompound persistentData;
 
     @Override
     public NbtCompound getPersistentData() {
-        if (this.persistentData==null) {
+        if (this.persistentData == null) {
             this.persistentData = new NbtCompound();
         }
         return persistentData;
