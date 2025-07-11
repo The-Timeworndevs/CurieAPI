@@ -27,10 +27,10 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class QuantumConfig {
-    public static HashMap<Block, HashMap<RadiationType, Float>> BLOCK_RADIATION_VALUES = new HashMap<>();
-    public static HashMap<Item, HashMap<RadiationType, Float>> ITEM_RADIATION_VALUES = new HashMap<>();
-    public static HashMap<String, HashMap<RadiationType, Float>> BIOME_RADIATION_VALUES = new HashMap<>();
-    public static HashMap<Block, HashMap<RadiationType, Float>> INSULATORS = new HashMap<>();
+    public static HashMap<Block, HashMap<RadiationType, Integer>> BLOCK_RADIATION_VALUES = new HashMap<>();
+    public static HashMap<Item, HashMap<RadiationType, Integer>> ITEM_RADIATION_VALUES = new HashMap<>();
+    public static HashMap<String, HashMap<RadiationType, Integer>> BIOME_RADIATION_VALUES = new HashMap<>();
+    public static HashMap<Block, HashMap<RadiationType, Integer>> INSULATORS = new HashMap<>();
     public static ArrayList<ArmorInsulator> ARMOR_INSULATORS = new ArrayList<>();
     public static int cap = 100000;
     public static int divConstant = 4;
@@ -151,7 +151,7 @@ public class QuantumConfig {
         for (JsonElement element: json) {
             ArrayList<Float> values = new ArrayList<>();
             ArrayList<Item> armorItems = new ArrayList<>();
-            HashMap<RadiationType, Float> radiationValues = new HashMap<>();
+            HashMap<RadiationType, Integer> radiationValues = new HashMap<>();
             element.getAsJsonObject().entrySet().stream()
                     .filter(entry -> pieceList.contains(entry.getKey()))
                     .map(entry -> entry.getValue().getAsJsonObject())
@@ -170,10 +170,10 @@ public class QuantumConfig {
         }
     }
 
-    private static Stream<Map.Entry<RadiationType, Float>> mapRadiationTypes(JsonObject json) {
+    private static Stream<Map.Entry<RadiationType, Integer>> mapRadiationTypes(JsonObject json) {
         return json.keySet().stream()
                 .filter(key -> !key.equals("object"))
                 .filter(type -> RadiationType.getRadiationType(type) != null)
-                .map(key -> Map.entry(RadiationType.getRadiationType(key), json.get(key).getAsFloat()));
+                .map(key -> Map.entry(RadiationType.getRadiationType(key), json.get(key).getAsInt()));
     }
 }

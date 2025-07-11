@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multipliers, HashMap<RadiationType, Float> radiations) {
+public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multipliers, HashMap<RadiationType, Integer> radiations) {
 
     public boolean containsItem(Item item) {
         return armorItems.contains(item);
