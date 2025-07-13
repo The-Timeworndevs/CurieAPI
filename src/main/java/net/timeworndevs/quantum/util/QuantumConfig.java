@@ -1,6 +1,5 @@
 package net.timeworndevs.quantum.util;
 
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -35,7 +34,7 @@ public class QuantumConfig {
     public static int cap = 100000;
     public static int divConstant = 4;
 
-    private static final Map<String, Consumer<JsonArray>> configHandlers = Map.of(
+    private static final Map<String, Consumer<JsonElement>> configHandlers = Map.of(
             "radiation_types", QuantumConfig::addRadiationTypes,
             "blocks", QuantumConfig::addBlocksToConfig,
             "biomes", QuantumConfig::addBiomesToConfig,
@@ -50,7 +49,7 @@ public class QuantumConfig {
                 Files.createDirectory(path);
             }
         } catch (IOException e) {
-            Quantum.LOGGER.error("Couldn't create directory: " + path);
+            Quantum.LOGGER.error("Couldn't create directory: {}", path);
         }
         try (Stream<Path> stream = Files.list(path)) {
             stream.filter(Files::isRegularFile)
@@ -59,26 +58,26 @@ public class QuantumConfig {
                     JsonObject json;
                     try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                         json = JsonParser.parseReader(br).getAsJsonObject();
-                        for (Map.Entry<String, Consumer<JsonArray>> entry : configHandlers.entrySet()) {
+                        // Loops through all possible config options and then extracts their values.
+                        for (Map.Entry<String, Consumer<JsonElement>> entry : configHandlers.entrySet()) {
                             if (json.has(entry.getKey())) {
-                                entry.getValue().accept(json.getAsJsonArray(entry.getKey()));
+                                entry.getValue().accept(json.get(entry.getKey()));
                             }
                         }
+                        // Changes the max cap for radiation.
                         if (json.has("cap") && cap == 100000) {
                             cap = json.get("cap").getAsInt();
                         }
+                        // Changes the division constant for radiation.
                         if (json.has("div_constant") && divConstant == 4) {
-                            cap = json.get("div_constant").getAsInt();
+                            divConstant = json.get("div_constant").getAsInt();
                         }
-                        ARMOR_INSULATORS.forEach(armorInsulator -> {
-                            Quantum.LOGGER.info(String.valueOf(armorInsulator.armorItems()));
-                        });
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
         } catch (IOException e) {
-            Quantum.LOGGER.error("Couldn't read file: " + path);
+            Quantum.LOGGER.error("Couldn't read file: {}", path);
         }
     }
 
@@ -89,66 +88,76 @@ public class QuantumConfig {
                 .orElse(null);
     }
 
-    private static void addRadiationTypes(JsonArray json) {
-        for (JsonElement element: json) {
+    // Adds new radiation types from the config.
+    private static void addRadiationTypes(JsonElement json) {
+        for (JsonElement element: json.getAsJsonArray()) {
             JsonObject object = element.getAsJsonObject();
             String name = object.get("name").getAsString();
             if (!RadiationType.RADIATION_TYPES.containsKey(name)) {
                 JsonArray array = object.getAsJsonArray("color");
-                float[] color = new float[4];
+                ArrayList<Float> color = new ArrayList<>();
                 for (int i = 0; i < Math.min(array.size(), 4); i++) {
-                    color[i] = array.get(i).getAsFloat();
+                    color.add(i, array.get(i).getAsFloat());
                 }
                 RadiationType.register(name, color);
             } else {
-                Quantum.LOGGER.warn(name + " has already been registered!");
+                Quantum.LOGGER.warn("{} has already been registered!", name);
             }
         }
     }
-    private static void addBlocksToConfig(JsonArray json) {
-        for (JsonElement element: json) {
-            JsonObject object = element.getAsJsonObject();
-            Block block = Registries.BLOCK.get(new Identifier(object.get("object").getAsString()));
+
+    // Adds all radioactive blocks from the config.
+    private static void addBlocksToConfig(JsonElement json) {
+        for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+            JsonObject object = entry.getValue().getAsJsonObject();
+            Block block = Registries.BLOCK.get(new Identifier(entry.getKey()));
 
             if (block != Blocks.AIR) {
-                mapRadiationTypes(object).forEach(entry ->
-                        BLOCK_RADIATION_VALUES.computeIfAbsent(block, data -> new HashMap<>()).put(entry.getKey(), entry.getValue()));
+                mapRadiationTypes(object).forEach(radiationEntry ->
+                        BLOCK_RADIATION_VALUES.computeIfAbsent(block, data -> new HashMap<>()).put(radiationEntry.getKey(), radiationEntry.getValue()));
             }
         }
     }
-    private static void addInsulatorsToConfig(JsonArray json) {
-        for (JsonElement element: json) {
-            JsonObject object = element.getAsJsonObject();
-            Block block = Registries.BLOCK.get(new Identifier(object.get("object").getAsString()));
+
+    // Adds all insulator blocks (negates radiation) from the config.
+    private static void addInsulatorsToConfig(JsonElement json) {
+        for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+            JsonObject object = entry.getValue().getAsJsonObject();
+            Block block = Registries.BLOCK.get(new Identifier(entry.getKey()));
 
             if (block != Blocks.AIR) {
-                mapRadiationTypes(object).forEach(entry ->
-                        INSULATORS.computeIfAbsent(block, data -> new HashMap<>()).put(entry.getKey(), entry.getValue()));
+                mapRadiationTypes(object).forEach(insulatorEntry ->
+                        INSULATORS.computeIfAbsent(block, data -> new HashMap<>()).put(insulatorEntry.getKey(), insulatorEntry.getValue()));
             }
         }
     }
-    private static void addBiomesToConfig(JsonArray json) {
-        for (JsonElement element: json) {
-            JsonObject object = element.getAsJsonObject();
-            String biome = object.get("object").getAsString();
 
-            mapRadiationTypes(object).forEach(entry ->
-                    BIOME_RADIATION_VALUES.computeIfAbsent(biome, data -> new HashMap<>()).put(entry.getKey(), entry.getValue()));
+    // Adds all biomes that are radioactive to the config.
+    private static void addBiomesToConfig(JsonElement json) {
+        for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+            JsonObject object = entry.getValue().getAsJsonObject();
+
+            mapRadiationTypes(object).forEach(biomeEntry ->
+                    BIOME_RADIATION_VALUES.computeIfAbsent(entry.getKey(), data -> new HashMap<>()).put(biomeEntry.getKey(), biomeEntry.getValue()));
         }
     }
-    private static void addItemsToConfig(JsonArray json) {
-        for (JsonElement element: json) {
-            JsonObject object = element.getAsJsonObject();
-            Item item = Registries.ITEM.get(new Identifier(object.get("object").getAsString()));
+
+    // Adds all radioactive items to the config.
+    private static void addItemsToConfig(JsonElement json) {
+        for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+            JsonObject object = entry.getValue().getAsJsonObject();
+            Item item = Registries.ITEM.get(new Identifier(entry.getKey()));
             if (item != Items.AIR) {
-                mapRadiationTypes(object).forEach(entry ->
-                        ITEM_RADIATION_VALUES.computeIfAbsent(item, data -> new HashMap<>()).put(entry.getKey(), entry.getValue()));
+                mapRadiationTypes(object).forEach(itemEntry ->
+                        ITEM_RADIATION_VALUES.computeIfAbsent(item, data -> new HashMap<>()).put(itemEntry.getKey(), itemEntry.getValue()));
             }
         }
     }
-    private static void addArmorInsulatorsToConfig(JsonArray json) {
+
+    // Adds all armor items that can reduce radiation to the config.
+    private static void addArmorInsulatorsToConfig(JsonElement json) {
         List<String> pieceList = List.of("helmet", "chestplate", "leggings", "boots");
-        for (JsonElement element: json) {
+        for (JsonElement element: json.getAsJsonArray()) {
             ArrayList<Float> values = new ArrayList<>();
             ArrayList<Item> armorItems = new ArrayList<>();
             HashMap<RadiationType, Integer> radiationValues = new HashMap<>();
@@ -165,11 +174,12 @@ public class QuantumConfig {
                     });
             if (!armorItems.isEmpty()) {
                 mapRadiationTypes(element.getAsJsonObject()).forEach(entry -> radiationValues.put(entry.getKey(), entry.getValue()));
-                ARMOR_INSULATORS.add(new ArmorInsulator(armorItems, values, radiationValues));
+                ArmorInsulator.register(armorItems, values, radiationValues);
             }
         }
     }
 
+    // Creates a map of all the valid radiation types and their values to be used by the other methods.
     private static Stream<Map.Entry<RadiationType, Integer>> mapRadiationTypes(JsonObject json) {
         return json.keySet().stream()
                 .filter(key -> !key.equals("object"))

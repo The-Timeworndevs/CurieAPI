@@ -2,9 +2,10 @@ package net.timeworndevs.quantum.radiation;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 
-public abstract class RadiationEffect {
 
-    public RadiationEffect() {}
+import java.util.Map;
 
-    public abstract void applyEffect(ServerPlayerEntity player, RadiationType[] types);
+public interface RadiationEffect {
+    // Applies the effect determined by the class.
+    void applyEffect(ServerPlayerEntity player, Map<RadiationType, Float> types);
 }

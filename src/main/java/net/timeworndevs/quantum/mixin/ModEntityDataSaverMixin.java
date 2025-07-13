@@ -1,37 +1,37 @@
 package net.timeworndevs.quantum.mixin;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.timeworndevs.quantum.Quantum;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(LivingEntity.class)
+@Mixin(PlayerEntity.class)
 public abstract class ModEntityDataSaverMixin implements IEntityDataSaver {
     @Unique
-    private NbtCompound persistentData;
-
+    private NbtCompound persistentData = new NbtCompound();
+    @Unique
+    private static final String radiationData = Quantum.MOD_ID + ":radiation";
     @Override
-    public NbtCompound getPersistentData() {
-        if (this.persistentData == null) {
-            this.persistentData = new NbtCompound();
-        }
+    public NbtCompound quantum$getPersistentData() {
         return persistentData;
     }
 
-    //GENUINELY IDFK WHAT THAT IS :sob:
-
-    /*@Inject(method="writeNbt", at = @At("HEAD"))
-    protected void injectWriteMethod(NbtCompound nbt, CallbackInfoReturnable info) {
-        if (persistentData!=null) {
-            nbt.put(Quantum.MOD_ID + ".fok_data", persistentData);
-        }
+    @Inject(method="writeCustomDataToNbt", at = @At("TAIL"))
+    protected void injectWriteMethod(NbtCompound nbt, CallbackInfo ci) {
+        nbt.put(radiationData, persistentData);
     }
 
-    @Inject(method="readNbt", at = @At("HEAD"))
+    @Inject(method="readCustomDataFromNbt", at = @At("TAIL"))
     protected void injectReadMethod(NbtCompound nbt, CallbackInfo info) {
-        if (nbt.contains(Quantum.MOD_ID+".fok_data", 10)) {
-            persistentData = nbt.getCompound(Quantum.MOD_ID + ".fok_data");
+        if (nbt.contains(radiationData, NbtElement.COMPOUND_TYPE)) {
+
+            persistentData = nbt.getCompound(radiationData);
         }
-    }*/
+    }
 }

@@ -19,7 +19,18 @@ public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multi
         }
         return 0.0f;
     }
+
+    // Creates a new armor insulator value
+    public static ArmorInsulator register(ArrayList<Item> armorItems, ArrayList<Float> multipliers, HashMap<RadiationType, Integer> radiations) {
+        ArmorInsulator insulator = new ArmorInsulator(armorItems, multipliers, radiations);
+        QuantumConfig.ARMOR_INSULATORS.add(insulator);
+        return insulator;
+    }
+
     public float getRadiation(RadiationType type) {
-        return radiations.get(type);
+        if (radiations.containsKey(type)) {
+            return radiations.get(type);
+        }
+        return 0.0f;
     }
 }
