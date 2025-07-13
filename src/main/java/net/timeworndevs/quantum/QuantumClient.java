@@ -11,8 +11,6 @@ import net.timeworndevs.quantum.radiation.RadiationType;
 public class QuantumClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-            RadiationType.RadiationPacket.registerPackets();
-        });
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> RadiationType.RadiationPacket.registerPackets());
     }
 }

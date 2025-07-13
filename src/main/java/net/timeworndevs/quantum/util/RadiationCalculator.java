@@ -17,7 +17,6 @@ import net.minecraft.world.LightType;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.timeworndevs.quantum.Quantum;
 import net.timeworndevs.quantum.radiation.RadiationType;
 
 import java.util.Optional;

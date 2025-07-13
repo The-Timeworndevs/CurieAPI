@@ -16,9 +16,7 @@ public class Quantum implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("Computing wave-functions...");
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            QuantumConfig.readConfig();
-        });
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> QuantumConfig.readConfig());
         ServerTickEvents.START_SERVER_TICK.register(new PlayerTickHandler());
         LOGGER.info("Wormhole established!");
     }
