@@ -147,7 +147,12 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                 }
             }
         }
-
+        if (radiationAround > Quantum.max_block_intake) {
+            radiationAround = Quantum.max_block_intake;
+        }
+        if (radiationFromItems > Quantum.max_item_intake) {
+            radiationFromItems = Quantum.max_item_intake;
+        }
 
         return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (((100 - Math.min(armorProtection, 100)))))/Quantum.div_constant;
     }

@@ -49,8 +49,14 @@ public class Quantum implements ModInitializer {
 
     public static HashMap<String, JsonObject> radiation_data = new HashMap<>();
     public static HashMap<String, String> new_radiation_types = new HashMap<>();
-    public static int cap = 100000;
-    public static int div_constant = 4;
+    public static int def_cap = 100000;
+    public static int cap = def_cap;
+    public static int def_div_constant = 4;
+    public static int div_constant = def_div_constant;
+    public static int def_max_block_intake = 100;
+    public static int def_max_item_intake = 100;
+    public static int max_block_intake = def_max_block_intake;
+    public static int max_item_intake = def_max_item_intake;
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
     @Override
@@ -115,16 +121,28 @@ public class Quantum implements ModInitializer {
         for (String key: Quantum.radiation_data.keySet()) {
             JsonObject rad = Quantum.radiation_data.get(key);
             if (rad.has("cap")) {
-                if (cap != 100000) {
-                    LOGGER.warn("Radiation Cap defined multiple times.");
+                if (cap != def_cap) {
+                    LOGGER.warn("(radiation) cap defined multiple times.");
                 }
                 cap = rad.get("cap").getAsInt();
             }
             if (rad.has("div_constant")) {
-                if (div_constant != 4) {
-                    LOGGER.warn("Div Constant was defined multiple times.");
+                if (div_constant != def_div_constant) {
+                    LOGGER.warn("div_constant was defined multiple times.");
                 }
                 div_constant = rad.get("div_constant").getAsInt();
+            }
+            if (rad.has("max_block_intake")) {
+                if (max_block_intake != def_max_block_intake) {
+                    LOGGER.warn("max_block_intake was defined multiple times.");
+                }
+                max_block_intake = rad.get("max_block_intake").getAsInt();
+            }
+            if (rad.has("max_item_intake")) {
+                if (max_item_intake != def_max_item_intake) {
+                    LOGGER.warn("max_item_intake was defined multiple times.");
+                }
+                max_item_intake = rad.get("max_item_intake").getAsInt();
             }
         }
         // This code runs as soon as Minecraft is in a mod-load-ready state.
