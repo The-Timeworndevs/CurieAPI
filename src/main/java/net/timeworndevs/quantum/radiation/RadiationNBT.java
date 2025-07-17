@@ -12,10 +12,7 @@ public class RadiationNBT {
     // Gets the radiation value of a specific type for the player.
     public static int get(IEntityDataSaver player, String type) {
         NbtCompound tag = get(player);
-        if (tag.contains(type)) {
-            return tag.getInt(type);
-        }
-        return 0;
+        return tag.getInt(type);
     }
 
     // Sets a radiation value of the player.

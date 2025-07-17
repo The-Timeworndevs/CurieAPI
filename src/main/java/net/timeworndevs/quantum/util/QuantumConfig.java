@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -31,8 +30,10 @@ public class QuantumConfig {
     public static HashMap<String, HashMap<RadiationType, Integer>> BIOME_RADIATION_VALUES = new HashMap<>();
     public static HashMap<Block, HashMap<RadiationType, Integer>> INSULATORS = new HashMap<>();
     public static ArrayList<ArmorInsulator> ARMOR_INSULATORS = new ArrayList<>();
-    public static int cap = 100000;
-    public static int divConstant = 4;
+    public static final int defaultCap = 100000;
+    public static final int defaultDivConstant = 4;
+    public static int cap = defaultCap;
+    public static int divConstant = defaultDivConstant;
 
     private static final Map<String, Consumer<JsonElement>> configHandlers = Map.of(
             "radiation_types", QuantumConfig::addRadiationTypes,
@@ -65,15 +66,15 @@ public class QuantumConfig {
                             }
                         }
                         // Changes the max cap for radiation.
-                        if (json.has("cap") && cap == 100000) {
+                        if (json.has("cap") && cap == defaultCap) {
                             cap = json.get("cap").getAsInt();
                         }
                         // Changes the division constant for radiation.
-                        if (json.has("div_constant") && divConstant == 4) {
+                        if (json.has("div_constant") && divConstant == defaultDivConstant) {
                             divConstant = json.get("div_constant").getAsInt();
                         }
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        Quantum.LOGGER.error("Couldn't read file: {}", path);
                     }
                 });
         } catch (IOException e) {
@@ -93,16 +94,15 @@ public class QuantumConfig {
         for (JsonElement element: json.getAsJsonArray()) {
             JsonObject object = element.getAsJsonObject();
             String name = object.get("name").getAsString();
-            if (!RadiationType.RADIATION_TYPES.containsKey(name)) {
+
+            RadiationType.RADIATION_TYPES.computeIfAbsent(name, radiationType -> {
                 JsonArray array = object.getAsJsonArray("color");
                 ArrayList<Float> color = new ArrayList<>();
                 for (int i = 0; i < Math.min(array.size(), 4); i++) {
                     color.add(i, array.get(i).getAsFloat());
                 }
-                RadiationType.register(name, color);
-            } else {
-                Quantum.LOGGER.warn("{} has already been registered!", name);
-            }
+                return new RadiationType(name, color);
+            });
         }
     }
 
@@ -156,22 +156,24 @@ public class QuantumConfig {
 
     // Adds all armor items that can reduce radiation to the config.
     private static void addArmorInsulatorsToConfig(JsonElement json) {
-        List<String> pieceList = List.of("helmet", "chestplate", "leggings", "boots");
         for (JsonElement element: json.getAsJsonArray()) {
             ArrayList<Float> values = new ArrayList<>();
             ArrayList<Item> armorItems = new ArrayList<>();
             HashMap<RadiationType, Integer> radiationValues = new HashMap<>();
-            element.getAsJsonObject().entrySet().stream()
-                    .filter(entry -> pieceList.contains(entry.getKey()))
-                    .map(entry -> entry.getValue().getAsJsonObject())
-                    .filter(object -> object.has("item") && object.has("multiplier"))
-                    .forEach(object -> {
-                        Item item = Registries.ITEM.get(new Identifier(object.get("item").getAsString()));
-                        if (item != Items.AIR) {
-                            values.add(object.get("multiplier").getAsFloat());
-                            armorItems.add(item);
-                        }
-                    });
+
+            for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
+                String name = entry.getKey();
+                JsonObject value = entry.getValue().getAsJsonObject();
+
+                if (ArmorInsulator.pieceList.contains(name) && (value.has("item") && value.has("multiplier"))) {
+                    Item item = Registries.ITEM.get(new Identifier(value.get("item").getAsString()));
+                    if (item != Items.AIR) {
+                        values.add(value.get("multiplier").getAsFloat());
+                        armorItems.add(item);
+                    }
+                }
+            }
+
             if (!armorItems.isEmpty()) {
                 mapRadiationTypes(element.getAsJsonObject()).forEach(entry -> radiationValues.put(entry.getKey(), entry.getValue()));
                 ArmorInsulator.register(armorItems, values, radiationValues);

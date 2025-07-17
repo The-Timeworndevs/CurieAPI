@@ -6,7 +6,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.timeworndevs.quantum.radiation.RadiationData;
 import net.timeworndevs.quantum.radiation.RadiationType;
-import net.timeworndevs.quantum.util.IEntityDataSaver;
 import net.timeworndevs.quantum.util.RadiationCalculator;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
@@ -15,14 +14,14 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
     public void onStartTick(MinecraftServer server) {
         if (tick >= 20) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                ServerWorld world = (ServerWorld) player.getWorld();
+                ServerWorld world = player.getServerWorld();
 
                 for (RadiationType type : RadiationType.RADIATION_TYPES.values()) {
                     int radiation = RadiationCalculator.calculateRadiationForType(world, player, type);
                     if (radiation > 0) {
-                        RadiationData.addRad((IEntityDataSaver) player, type, radiation);
+                        RadiationData.addRad(player, type, radiation);
                     } else {
-                        RadiationData.delRad((IEntityDataSaver) player, type, 1);
+                        RadiationData.delRad(player, type, 1);
                     }
                 }
             }

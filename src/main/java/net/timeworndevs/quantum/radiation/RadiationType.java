@@ -8,6 +8,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.timeworndevs.quantum.Quantum;
 import net.timeworndevs.quantum.util.IEntityDataSaver;
+import net.timeworndevs.quantum.util.QuantumConfig;
 
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class RadiationType {
     private final RadiationPacket syncPacket;
 
     // Creates a new radiation type.
-    private RadiationType(String name, List<Float> color) {
+    public RadiationType(String name, List<Float> color) {
         this.name = name;
         this.color = color;
         this.syncID = new Identifier(Quantum.MOD_ID, "radiation_" + name + "_sync");
@@ -58,7 +59,7 @@ public class RadiationType {
     // Registers a new radiation type.
     public static RadiationType register(String name, List<Float> color) {
         RadiationType type = new RadiationType(name, color);
-        RADIATION_TYPES.put(name, type);
+        RADIATION_TYPES.putIfAbsent(name, type);
         return type;
     }
 
@@ -89,7 +90,7 @@ public class RadiationType {
                             PacketByteBuf buf, PacketSender responseSender) {
             int value = buf.readInt();
             if (client.player != null) {
-                RadiationData.setRad((IEntityDataSaver) client.player, this.radiationType, value);
+                RadiationNBT.set((IEntityDataSaver) client.player, this.radiationType, Math.min(value, QuantumConfig.cap));
             }
         }
     }

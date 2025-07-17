@@ -5,17 +5,18 @@ import net.timeworndevs.quantum.radiation.RadiationType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.List;
 
 public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multipliers, HashMap<RadiationType, Integer> radiations) {
+    public static List<String> pieceList = List.of("helmet", "chestplate", "leggings", "boots");
 
     public boolean containsItem(Item item) {
         return armorItems.contains(item);
     }
 
     public float getMultiplier(Item item) {
-        if (containsItem(item)) {
-            return multipliers.get(armorItems.indexOf(item));
+        if (this.containsItem(item)) {
+            return this.multipliers.get(this.armorItems.indexOf(item));
         }
         return 0.0f;
     }
@@ -27,10 +28,7 @@ public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multi
         return insulator;
     }
 
-    public float getRadiation(RadiationType type) {
-        if (radiations.containsKey(type)) {
-            return radiations.get(type);
-        }
-        return 0.0f;
+    public int getRadiation(RadiationType type) {
+        return this.radiations.getOrDefault(type, 0);
     }
 }
