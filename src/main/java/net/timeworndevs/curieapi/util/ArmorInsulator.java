@@ -39,7 +39,7 @@ public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multi
 
     }
 
-    public int getRadiation(RadiationType type) {
+    public float getRadiation(RadiationType type) {
         return this.radiations.get(type);
     }
 }

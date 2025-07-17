@@ -3,6 +3,8 @@ package net.timeworndevs.curieapi.util;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.timeworndevs.curieapi.radiation.RadiationEntry;
+import net.timeworndevs.curieapi.radiation.RadiationType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,10 +15,10 @@ public class PlayerCache {
     private final PlayerEntity player;
     private Map<Item, Integer> inventory;
     private List<Item> armor;
-    private int itemRadiation;
-    private float biomeRadiation;
-    private float blockRadiation;
-    private float armorInsulation;
+    private RadiationEntry itemRadiation;
+    private RadiationEntry biomeRadiation;
+    private RadiationEntry blockRadiation;
+    private RadiationEntry armorInsulation;
 
     public PlayerCache(PlayerEntity player) {
         this.player = player;
@@ -46,11 +48,11 @@ public class PlayerCache {
         this.inventory = this.createInventoryMap();
     }
 
-    public void setItemRadiation(int radiation) {
-        this.itemRadiation = radiation;
+    public void setItemRadiation(RadiationType type, float radiation) {
+        this.itemRadiation.put(type, radiation);
     }
-    public int getPrevItemRadiation() {
-        return this.itemRadiation;
+    public float getPrevItemRadiation(RadiationType type) {
+        return this.itemRadiation.get(type);
     }
 
     public boolean armorEquals(List<Item> armor) {
@@ -63,27 +65,27 @@ public class PlayerCache {
                 .map(ItemStack::getItem)
                 .toList();
     }
-    public void updateArmor(List<Item> armor, float insulation) {
+    public void updateArmor(List<Item> armor, RadiationType type, float insulation) {
         this.armor = armor;
-        this.armorInsulation = insulation;
+        this.armorInsulation.put(type, insulation);
     }
 
-    public float getArmorInsulation() {
-        return this.armorInsulation;
+    public float getArmorInsulation(RadiationType type) {
+        return this.armorInsulation.get(type);
     }
 
-    public float getPrevBiomeRadiation() {
-        return this.biomeRadiation;
+    public float getPrevBiomeRadiation(RadiationType type) {
+        return this.biomeRadiation.get(type);
     }
-    public void setBiomeRadiation(float radiation) {
-        this.biomeRadiation = radiation;
+    public void setBiomeRadiation(RadiationType type, float radiation) {
+        this.biomeRadiation.put(type, radiation);
     }
 
-    public float getPrevBlockRadiation() {
-        return this.blockRadiation;
+    public float getPrevBlockRadiation(RadiationType type) {
+        return this.blockRadiation.get(type);
     }
-    public void setBlockRadiation(float radiation) {
-        this.blockRadiation = radiation;
+    public void setBlockRadiation(RadiationType type, float radiation) {
+        this.blockRadiation.put(type, radiation);
     }
 
 

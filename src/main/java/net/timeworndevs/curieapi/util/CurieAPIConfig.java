@@ -174,7 +174,7 @@ public class CurieAPIConfig {
     private static RadiationEntry mapRadiationTypes(JsonObject json) {
         return new RadiationEntry(json.keySet().stream()
                 .filter(type -> RadiationType.getRadiationType(type) != null)
-                .map(key -> Map.entry(RadiationType.getRadiationType(key), json.get(key).getAsInt()))
+                .map(key -> Map.entry(RadiationType.getRadiationType(key), json.get(key).getAsFloat()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 }
