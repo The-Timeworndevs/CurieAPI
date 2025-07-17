@@ -1,4 +1,4 @@
-package net.timeworndevs.quantum.radiation;
+package net.timeworndevs.curieapi.radiation;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -6,9 +6,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.timeworndevs.quantum.Quantum;
-import net.timeworndevs.quantum.util.IEntityDataSaver;
-import net.timeworndevs.quantum.util.QuantumConfig;
+import net.timeworndevs.curieapi.CurieAPI;
+import net.timeworndevs.curieapi.util.CurieAPIConfig;
+import net.timeworndevs.curieapi.util.IEntityDataSaver;
 
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class RadiationType {
     public RadiationType(String name, List<Float> color) {
         this.name = name;
         this.color = color;
-        this.syncID = new Identifier(Quantum.MOD_ID, "radiation_" + name + "_sync");
+        this.syncID = new Identifier(CurieAPI.MOD_ID, "radiation_" + name + "_sync");
         this.syncPacket = new RadiationPacket(this, this.syncID);
     }
     // Checks if there is a radiation type with that name.
@@ -90,7 +90,7 @@ public class RadiationType {
                             PacketByteBuf buf, PacketSender responseSender) {
             int value = buf.readInt();
             if (client.player != null) {
-                RadiationNBT.set((IEntityDataSaver) client.player, this.radiationType, Math.min(value, QuantumConfig.cap));
+                RadiationNBT.set((IEntityDataSaver) client.player, this.radiationType, Math.min(value, CurieAPIConfig.cap));
             }
         }
     }

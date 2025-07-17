@@ -1,4 +1,4 @@
-package net.timeworndevs.quantum.radiation;
+package net.timeworndevs.curieapi.radiation;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 

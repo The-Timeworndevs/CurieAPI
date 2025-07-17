@@ -1,4 +1,4 @@
-package net.timeworndevs.quantum.util;
+package net.timeworndevs.curieapi.util;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -18,13 +18,13 @@ import net.minecraft.world.LightType;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.timeworndevs.quantum.radiation.RadiationType;
+import net.timeworndevs.curieapi.radiation.RadiationType;
 
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static net.timeworndevs.quantum.util.QuantumConfig.*;
+import static net.timeworndevs.curieapi.util.CurieAPIConfig.*;
 
 public class RadiationCalculator {
     public static int calculateInventoryRadiation(ServerPlayerEntity player, RadiationType type) {
@@ -61,6 +61,7 @@ public class RadiationCalculator {
     }
     // Raycasts from the player to the radioactive block
     private static BlockHitResult raycastInsulator(RaycastContext context, Predicate<BlockState> statePredicate, BlockPos ignored, ServerWorld world) {
+
         return BlockView.raycast(context.getStart(), context.getEnd(), context, (innerContext, pos) -> {
             if (pos.equals(ignored)) {
                 return null;

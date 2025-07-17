@@ -1,12 +1,12 @@
-package net.timeworndevs.quantum.radiation;
+package net.timeworndevs.curieapi.radiation;
 
 import net.minecraft.nbt.NbtCompound;
-import net.timeworndevs.quantum.util.IEntityDataSaver;
+import net.timeworndevs.curieapi.util.IEntityDataSaver;
 
 public class RadiationNBT {
     // Gets the radiation values of the player.
     public static NbtCompound get(IEntityDataSaver player) {
-        return player.quantum$getPersistentData();
+        return player.CurieAPI$getPersistentData();
     }
 
     // Gets the radiation value of a specific type for the player.

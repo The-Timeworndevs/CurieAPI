@@ -1,12 +1,12 @@
-package net.timeworndevs.quantum.radiation;
+package net.timeworndevs.curieapi.radiation;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.timeworndevs.quantum.util.IEntityDataSaver;
-import net.timeworndevs.quantum.util.QuantumConfig;
+import net.timeworndevs.curieapi.util.IEntityDataSaver;
+import net.timeworndevs.curieapi.util.CurieAPIConfig;
 
 public final class RadiationData {
     private RadiationData() {}
@@ -14,7 +14,7 @@ public final class RadiationData {
     // Adds radiation to the player.
     public static void addRad(PlayerEntity player, RadiationType type, int amount) {
         int rad = RadiationNBT.get((IEntityDataSaver) player, type.getName());
-        rad = Math.min(rad + amount, QuantumConfig.cap);
+        rad = Math.min(rad + amount, CurieAPIConfig.cap);
 
         RadiationNBT.set((IEntityDataSaver) player, type, rad);
         syncRad(rad, type, player);
@@ -31,7 +31,7 @@ public final class RadiationData {
 
     // Sets the radiation of the player.
     public static void setRad(PlayerEntity player, RadiationType type, int rad) {
-        RadiationNBT.set((IEntityDataSaver) player, type, Math.min(rad, QuantumConfig.cap));
+        RadiationNBT.set((IEntityDataSaver) player, type, Math.min(rad, CurieAPIConfig.cap));
         syncRad(rad, type, player);
     }
 

@@ -1,4 +1,4 @@
-package net.timeworndevs.quantum.util;
+package net.timeworndevs.curieapi.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -11,8 +11,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.timeworndevs.quantum.Quantum;
-import net.timeworndevs.quantum.radiation.RadiationType;
+import net.timeworndevs.curieapi.CurieAPI;
+import net.timeworndevs.curieapi.radiation.RadiationType;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class QuantumConfig {
+public class CurieAPIConfig {
     public static HashMap<Block, HashMap<RadiationType, Integer>> BLOCK_RADIATION_VALUES = new HashMap<>();
     public static HashMap<Item, HashMap<RadiationType, Integer>> ITEM_RADIATION_VALUES = new HashMap<>();
     public static HashMap<String, HashMap<RadiationType, Integer>> BIOME_RADIATION_VALUES = new HashMap<>();
@@ -36,12 +36,12 @@ public class QuantumConfig {
     public static int divConstant = defaultDivConstant;
 
     private static final Map<String, Consumer<JsonElement>> configHandlers = Map.of(
-            "radiation_types", QuantumConfig::addRadiationTypes,
-            "blocks", QuantumConfig::addBlocksToConfig,
-            "biomes", QuantumConfig::addBiomesToConfig,
-            "items", QuantumConfig::addItemsToConfig,
-            "insulators", QuantumConfig::addInsulatorsToConfig,
-            "armor", QuantumConfig::addArmorInsulatorsToConfig
+            "radiation_types", CurieAPIConfig::addRadiationTypes,
+            "blocks", CurieAPIConfig::addBlocksToConfig,
+            "biomes", CurieAPIConfig::addBiomesToConfig,
+            "items", CurieAPIConfig::addItemsToConfig,
+            "insulators", CurieAPIConfig::addInsulatorsToConfig,
+            "armor", CurieAPIConfig::addArmorInsulatorsToConfig
     );
     public static void readConfig() {
         Path path = Paths.get(FabricLoader.getInstance().getConfigDir() + "/curie");
@@ -50,7 +50,7 @@ public class QuantumConfig {
                 Files.createDirectory(path);
             }
         } catch (IOException e) {
-            Quantum.LOGGER.error("Couldn't create directory: {}", path);
+            CurieAPI.LOGGER.error("Couldn't create directory: {}", path);
         }
         try (Stream<Path> stream = Files.list(path)) {
             stream.filter(Files::isRegularFile)
@@ -74,11 +74,11 @@ public class QuantumConfig {
                             divConstant = json.get("div_constant").getAsInt();
                         }
                     } catch (IOException e) {
-                        Quantum.LOGGER.error("Couldn't read file: {}", path);
+                        CurieAPI.LOGGER.error("Couldn't read file: {}", path);
                     }
                 });
         } catch (IOException e) {
-            Quantum.LOGGER.error("Couldn't read file: {}", path);
+            CurieAPI.LOGGER.error("Couldn't read file: {}", path);
         }
     }
 

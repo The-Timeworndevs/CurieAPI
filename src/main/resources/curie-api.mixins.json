@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "net.timeworndevs.quantum.mixin",
+	"package": "net.timeworndevs.curieapi.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"QuantumPlayerDataMixin"
+      "CurieAPIPlayerDataMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

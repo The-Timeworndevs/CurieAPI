@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "quantum",
+	"id": "curie-api",
 	"version": "${version}",
-	"name": "Quantum",
+	"name": "CurieAPI",
 	"description": "Well...",
 	"authors": [
 		"timeworndevs"
@@ -14,20 +14,20 @@
 		"sources": "https://github.com/FokoHetman/CurieAPI"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/quantum/icon.png",
+	"icon": "assets/curie-api/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.timeworndevs.quantum.Quantum"
+			"net.timeworndevs.curieapi.CurieAPI"
 		],
 		"client": [
 			{
-				"value": "net.timeworndevs.quantum.QuantumClient"
+				"value": "net.timeworndevs.curieapi.CurieAPIClient"
 			}
 		]
 	},
 	"mixins": [
-		"quantum.mixins.json"
+		"curie-api.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.14.21",
