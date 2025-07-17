@@ -1,10 +1,9 @@
-package net.timeworndevs.curieapi.util;
+package net.timeworndevs.curieapi.radiation;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -18,43 +17,56 @@ import net.minecraft.world.LightType;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.timeworndevs.curieapi.radiation.RadiationType;
+import net.timeworndevs.curieapi.util.ArmorInsulator;
+import net.timeworndevs.curieapi.util.PlayerCache;
 
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 import static net.timeworndevs.curieapi.util.CurieAPIConfig.*;
 
 public class RadiationCalculator {
-    public static int calculateInventoryRadiation(ServerPlayerEntity player, RadiationType type) {
-        int radiationFromItems = 0;
 
+    public static int calculateInventoryRadiation(RadiationType type, PlayerCache cache) {
+        int radiationFromItems = 0;
         // Search through inventory to find radioactive items.
-        for (ItemStack itemStack : player.getInventory().main) {
-            if (!itemStack.isEmpty()) {
-                Item item = itemStack.getItem();
+        Map<Item, Integer> items = cache.createInventoryMap();
+
+        if (cache.inventoryEquals(items)) {
+            radiationFromItems = cache.getPrevItemRadiation();
+        } else {
+            for (Map.Entry<Item, Integer> entry: items.entrySet()) {
+                Item item = entry.getKey();
+                int count = entry.getValue();
+
                 if (ITEM_RADIATION_VALUES.containsKey(item)) {
-                    radiationFromItems += ITEM_RADIATION_VALUES.get(item).getOrDefault(type, 0) * itemStack.getCount();
+                    radiationFromItems += ITEM_RADIATION_VALUES.get(item).get(type) * count;
                 }
             }
+            cache.updateInventory();
+            cache.setItemRadiation(radiationFromItems);
         }
         return radiationFromItems;
     }
-    public static float calculateBiomeRadiation(ServerWorld world, ServerPlayerEntity player, RadiationType type) {
+    public static float calculateBiomeRadiation(ServerWorld world, ServerPlayerEntity player, RadiationType type, PlayerCache cache) {
         float biomeMultiplier = 0;
+
         Optional<RegistryKey<Biome>> biome = world.getBiome(player.getBlockPos()).getKey();
 
         if (biome.isPresent()) {
             String biomeID = biome.get().getValue().toString();
-            // Check if biome is in BIOME_RADIATION_VALUES then adds a multiplier.
-            if (BIOME_RADIATION_VALUES.containsKey(biomeID)) {
-                biomeMultiplier = BIOME_RADIATION_VALUES.get(biomeID).getOrDefault(type, 0);
 
+            if (BIOME_RADIATION_VALUES.containsKey(biomeID)) {
+                // Check if biome is in BIOME_RADIATION_VALUES then adds a multiplier.
+                biomeMultiplier = BIOME_RADIATION_VALUES.get(biomeID).get(type);
+                cache.setBiomeRadiation(biomeMultiplier);
                 // If the player is in the overworld, also apply more radiation if exposed to light.
-                if (world.getRegistryKey().equals(World.OVERWORLD)) {
-                    biomeMultiplier = biomeMultiplier * (world.getLightLevel(LightType.SKY, player.getBlockPos()) / 15.0f);
-                }
+
+            }
+            if (world.getRegistryKey().equals(World.OVERWORLD)) {
+                biomeMultiplier = biomeMultiplier * (world.getLightLevel(LightType.SKY, player.getBlockPos()) / 15.0f);
             }
         }
         return biomeMultiplier;
@@ -97,9 +109,9 @@ public class RadiationCalculator {
             if (lastBlockPos.equals(blockPos)) {
                 reachedEnd = true;
             } else {
-                HashMap<RadiationType, Integer> map = INSULATORS.get(world.getBlockState(lastBlockPos).getBlock());
-                if (map != null) {
-                    totalInsulation += map.getOrDefault(type, 0);
+                RadiationEntry entry = INSULATORS.get(world.getBlockState(lastBlockPos).getBlock());
+                if (entry != null) {
+                    totalInsulation += entry.get(type);
                 }
                 start = result.getPos();
             }
@@ -108,7 +120,7 @@ public class RadiationCalculator {
     }
 
     // Calculates how many radioactive blocks are within a 11x11 box from the player.
-    public static int calculateBlockRadiation(ServerWorld world, ServerPlayerEntity player, RadiationType type) {
+    public static int calculateBlockRadiation(ServerWorld world, ServerPlayerEntity player, RadiationType type, PlayerCache cache) {
         int radiation = 0;
         BlockPos corner1 = player.getBlockPos().add(-5, -5, -5);
         BlockPos corner2 = player.getBlockPos().add(5, 5, 5);
@@ -117,28 +129,40 @@ public class RadiationCalculator {
             Block block = world.getBlockState(pos).getBlock();
             if (!block.equals(Blocks.AIR) && BLOCK_RADIATION_VALUES.containsKey(block)) {
                 int insulatorValue = calculateInsulators(world, player, type, pos);
-                radiation += Math.max(0, BLOCK_RADIATION_VALUES.get(block).getOrDefault(type, 0) - insulatorValue);
+                radiation += Math.max(0, BLOCK_RADIATION_VALUES.get(block).get(type) - insulatorValue);
             }
         }
+        cache.setBlockRadiation(radiation);
         return radiation;
     }
 
     // Calculates the amount of radiation to add to the player (for a period of time) for a type of radiation
     public static int calculateRadiationForType(ServerWorld world, ServerPlayerEntity player, RadiationType type) {
-        float biomeMultiplier = calculateBiomeRadiation(world, player, type);
-        int radiationAround = calculateBlockRadiation(world, player, type);
-        int radiationFromItems = calculateInventoryRadiation(player, type);
+        if (PlayerCache.get(player) == null) {
+            PlayerCache.add(player);
+        }
+        PlayerCache cache = PlayerCache.get(player);
+        float biomeMultiplier = calculateBiomeRadiation(world, player, type, cache);
+        int radiationAround = calculateBlockRadiation(world, player, type, cache);
+        int radiationFromItems = calculateInventoryRadiation(type, cache);
         float armorProtection = 0;
 
+        List<Item> armor = cache.createArmorMap();
         // Search through armor to find insulators.
-        for (ItemStack itemStack : player.getInventory().armor) {
-            Item item = itemStack.getItem();
-            ArmorInsulator insulator = findSetForItem(item);
-            // Checks if there is a valid insulator and if it can negate this type of radiation.
-            if (insulator != null && insulator.getRadiation(type) != 0) {
-                armorProtection += insulator.getMultiplier(item) * insulator.getRadiation(type) * 100;
+        if (cache.armorEquals(armor)) {
+            armorProtection = cache.getArmorInsulation();
+        } else {
+            for (Item item : armor) {
+                ArmorInsulator insulator = ArmorInsulator.findSetForItem(item);
+                // Checks if there is a valid insulator and if it can negate this type of radiation.
+                if (insulator != null && insulator.getRadiation(type) != 0) {
+                    armorProtection += insulator.getMultiplier(item) * insulator.getRadiation(type) * 100;
+                }
             }
+            cache.updateArmor(armor, armorProtection);
         }
+
+
         return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (100 - Math.min(armorProtection, 100))) / divConstant;
     }
 }

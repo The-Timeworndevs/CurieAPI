@@ -10,14 +10,12 @@ import net.timeworndevs.curieapi.CurieAPI;
 import net.timeworndevs.curieapi.util.CurieAPIConfig;
 import net.timeworndevs.curieapi.util.IEntityDataSaver;
 
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+import static net.timeworndevs.curieapi.util.CurieAPIConfig.RADIATION_TYPES;
+
 public class RadiationType {
-    // Stores all the radiation types found (config, other mods, etc.).
-    public static HashMap<String, RadiationType> RADIATION_TYPES = new HashMap<>();
 
     private final String name;
     private final List<Float> color;

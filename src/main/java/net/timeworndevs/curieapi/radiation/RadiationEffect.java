@@ -2,7 +2,6 @@ package net.timeworndevs.curieapi.radiation;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 
-
 import java.util.Map;
 
 public interface RadiationEffect {
