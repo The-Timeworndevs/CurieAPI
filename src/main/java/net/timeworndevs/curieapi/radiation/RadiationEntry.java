@@ -20,7 +20,7 @@ public record RadiationEntry(Map<RadiationType, Float> entries) {
     }
 
     public void put(RadiationType type, float value) {
-        this.entries.put(type, value + this.entries.getOrDefault(type, 0.0f));
+        this.entries.put(type, value);
     }
 
     public boolean containsKey(RadiationType type) {
