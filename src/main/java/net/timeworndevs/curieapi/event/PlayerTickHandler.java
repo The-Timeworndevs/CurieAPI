@@ -8,6 +8,9 @@ import net.timeworndevs.curieapi.radiation.RadiationData;
 import net.timeworndevs.curieapi.radiation.RadiationType;
 import net.timeworndevs.curieapi.radiation.RadiationCalculator;
 import net.timeworndevs.curieapi.util.CurieAPIConfig;
+import net.timeworndevs.curieapi.util.PlayerCache;
+
+import static net.timeworndevs.curieapi.util.CurieAPIConfig.PASSIVE_DECAY;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
     private int tick = 0;
@@ -18,13 +21,17 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
 
                 ServerWorld world = player.getServerWorld();
+                if (PlayerCache.get(player) == null) {
+                    PlayerCache.add(player);
+                }
 
+                PlayerCache cache = PlayerCache.get(player);
                 for (RadiationType type : CurieAPIConfig.RADIATION_TYPES.values()) {
-                    int radiation = RadiationCalculator.calculateRadiationForType(world, player, type);
+                    int radiation = RadiationCalculator.calculateRadiationForType(world, player, type, cache);
                     if (radiation > 0) {
                         RadiationData.addRad(player, type, radiation);
                     } else {
-                        RadiationData.delRad(player, type, 1);
+                        RadiationData.delRad(player, type, PASSIVE_DECAY);
                     }
                 }
             }

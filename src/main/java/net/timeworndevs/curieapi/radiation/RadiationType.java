@@ -88,7 +88,7 @@ public class RadiationType {
                             PacketByteBuf buf, PacketSender responseSender) {
             int value = buf.readInt();
             if (client.player != null) {
-                RadiationNBT.set((IEntityDataSaver) client.player, this.radiationType, Math.min(value, CurieAPIConfig.cap));
+                RadiationNBT.set((IEntityDataSaver) client.player, this.radiationType, Math.min(value, CurieAPIConfig.CAP));
             }
         }
     }

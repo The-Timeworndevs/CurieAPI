@@ -35,7 +35,7 @@ public class RadiationCalculator {
         Map<Item, Integer> items = cache.createInventoryMap();
 
         if (cache.inventoryEquals(items)) {
-            radiationFromItems = cache.getPrevItemRadiation(type);
+            radiationFromItems = cache.getPrevItemRadiation().get(type);
         } else {
             for (Map.Entry<Item, Integer> entry: items.entrySet()) {
                 Item item = entry.getKey();
@@ -45,6 +45,7 @@ public class RadiationCalculator {
                     radiationFromItems += ITEM_RADIATION_VALUES.get(item).get(type) * count;
                 }
             }
+            radiationFromItems = Math.min(radiationFromItems, MAX_ITEM_INTAKE);
             cache.updateInventory();
             cache.setItemRadiation(type, radiationFromItems);
         }
@@ -130,16 +131,13 @@ public class RadiationCalculator {
                 radiation += Math.max(0, BLOCK_RADIATION_VALUES.get(block).get(type) - insulatorValue);
             }
         }
+        radiation = Math.min(radiation, MAX_ITEM_INTAKE);
         cache.setBlockRadiation(type, radiation);
         return radiation;
     }
 
     // Calculates the amount of radiation to add to the player (for a period of time) for a type of radiation
-    public static int calculateRadiationForType(ServerWorld world, ServerPlayerEntity player, RadiationType type) {
-        if (PlayerCache.get(player) == null) {
-            PlayerCache.add(player);
-        }
-        PlayerCache cache = PlayerCache.get(player);
+    public static int calculateRadiationForType(ServerWorld world, ServerPlayerEntity player, RadiationType type, PlayerCache cache) {
         float biomeMultiplier = calculateBiomeRadiation(world, player, type, cache);
         float radiationAround = calculateBlockRadiation(world, player, type, cache);
         float radiationFromItems = calculateInventoryRadiation(type, cache);
@@ -148,7 +146,7 @@ public class RadiationCalculator {
         List<Item> armor = cache.createArmorMap();
         // Search through armor to find insulators.
         if (cache.armorEquals(armor)) {
-            armorProtection = cache.getArmorInsulation(type);
+            armorProtection = cache.getArmorInsulation().get(type);
         } else {
             for (Item item : armor) {
                 ArmorInsulator insulator = ArmorInsulator.findSetForItem(item);
@@ -160,6 +158,6 @@ public class RadiationCalculator {
             cache.updateArmor(armor, type, armorProtection);
         }
 
-        return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (100 - Math.min(armorProtection, 100))) / divConstant;
+        return Math.round((radiationAround + radiationFromItems + biomeMultiplier) * (100 - Math.min(armorProtection, 100))) / DIV_CONSTANT;
     }
 }

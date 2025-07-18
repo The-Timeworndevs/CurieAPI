@@ -1,10 +1,18 @@
 package net.timeworndevs.curieapi.radiation;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public record RadiationEntry(Map<RadiationType, Float> entries) {
+    public static RadiationEntry createEmpty() {
+        return new RadiationEntry(new HashMap<>());
+    }
+
     public float get(RadiationType type) {
         return this.entries.getOrDefault(type, 0.0f);
+    }
+    public void clear() {
+        this.entries.clear();
     }
 
     public float addAllTypes() {

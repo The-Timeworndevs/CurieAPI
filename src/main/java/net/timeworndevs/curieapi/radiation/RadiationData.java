@@ -14,7 +14,7 @@ public final class RadiationData {
     // Adds radiation to the player.
     public static void addRad(PlayerEntity player, RadiationType type, int amount) {
         int rad = RadiationNBT.get((IEntityDataSaver) player, type.getName());
-        rad = Math.min(rad + amount, CurieAPIConfig.cap);
+        rad = Math.min(rad + amount, CurieAPIConfig.CAP);
 
         RadiationNBT.set((IEntityDataSaver) player, type, rad);
         syncRad(rad, type, player);
@@ -31,7 +31,7 @@ public final class RadiationData {
 
     // Sets the radiation of the player.
     public static void setRad(PlayerEntity player, RadiationType type, int rad) {
-        RadiationNBT.set((IEntityDataSaver) player, type, Math.min(rad, CurieAPIConfig.cap));
+        RadiationNBT.set((IEntityDataSaver) player, type, Math.min(rad, CurieAPIConfig.CAP));
         syncRad(rad, type, player);
     }
 

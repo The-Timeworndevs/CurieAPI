@@ -33,10 +33,17 @@ public class CurieAPIConfig {
     public static HashMap<String, RadiationEntry> BIOME_RADIATION_VALUES = new HashMap<>();
     public static HashMap<Block, RadiationEntry> INSULATORS = new HashMap<>();
     public static ArrayList<ArmorInsulator> ARMOR_INSULATORS = new ArrayList<>();
-    public static final int defaultCap = 100000;
-    public static final int defaultDivConstant = 4;
-    public static int cap = defaultCap;
-    public static int divConstant = defaultDivConstant;
+    private static final int defaultCap = 100000;
+    private static final int defaultDivConstant = 4;
+    private static final int defaultMaxItemIntake = 100;
+    private static final int defaultMaxBlockIntake = 100;
+    private static final int defaultPassiveDecay = 8;
+
+    public static int CAP = defaultCap;
+    public static int DIV_CONSTANT = defaultDivConstant;
+    public static int MAX_ITEM_INTAKE = defaultMaxItemIntake;
+    public static int MAX_BLOCK_INTAKE = defaultMaxBlockIntake;
+    public static int PASSIVE_DECAY = defaultPassiveDecay;
 
     private static final Map<String, Consumer<JsonElement>> configHandlers = Map.of(
             "radiation_types", CurieAPIConfig::addRadiationTypes,
@@ -65,17 +72,28 @@ public class CurieAPIConfig {
                         // Loops through all possible config options and then extracts their values.
                         for (Map.Entry<String, Consumer<JsonElement>> entry : configHandlers.entrySet()) {
                             if (json.has(entry.getKey())) {
+                                CurieAPI.LOGGER.info("Loaded config: {}", entry.getKey());
                                 entry.getValue().accept(json.get(entry.getKey()));
                             }
                         }
-                        // Changes the max cap for radiation.
-                        if (json.has("cap") && cap == defaultCap) {
-                            cap = json.get("cap").getAsInt();
+                        // Changes the max CAP for radiation.
+                        if (json.has("cap") && CAP == defaultCap) {
+                            CAP = json.get("cap").getAsInt();
                         }
                         // Changes the division constant for radiation.
-                        if (json.has("div_constant") && divConstant == defaultDivConstant) {
-                            divConstant = json.get("div_constant").getAsInt();
+                        if (json.has("div_constant") && DIV_CONSTANT == defaultDivConstant) {
+                            DIV_CONSTANT = json.get("div_constant").getAsInt();
                         }
+                        if (json.has("max_block_intake") && MAX_BLOCK_INTAKE == defaultMaxBlockIntake) {
+                            MAX_BLOCK_INTAKE = json.get("max_block_intake").getAsInt();
+                        }
+                        if (json.has("max_item_intake") && MAX_ITEM_INTAKE == defaultMaxItemIntake) {
+                            MAX_ITEM_INTAKE = json.get("max_item_intake").getAsInt();
+                        }
+                        if (json.has("passive_radiation_decay") && PASSIVE_DECAY == defaultPassiveDecay) {
+                            MAX_ITEM_INTAKE = json.get("passive_radiation_decay").getAsInt();
+                        }
+
                     } catch (IOException e) {
                         CurieAPI.LOGGER.error("Couldn't read file: {}", path);
                     }
@@ -148,24 +166,19 @@ public class CurieAPIConfig {
     // Adds all armor items that can reduce radiation to the config.
     private static void addArmorInsulatorsToConfig(JsonElement json) {
         for (JsonElement element: json.getAsJsonArray()) {
-            ArrayList<Float> values = new ArrayList<>();
-            ArrayList<Item> armorItems = new ArrayList<>();
-
-            for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
-                String name = entry.getKey();
-                JsonObject value = entry.getValue().getAsJsonObject();
-
-                if (ArmorInsulator.pieceList.contains(name) && (value.has("item") && value.has("multiplier"))) {
-                    Item item = Registries.ITEM.get(new Identifier(value.get("item").getAsString()));
+            Map<Item, Float> armorValues = new HashMap<>();
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("armor") && object.has("radiation")) {
+                for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("armor").entrySet()) {
+                    Item item = Registries.ITEM.get(new Identifier(entry.getKey()));
                     if (item != Items.AIR) {
-                        values.add(value.get("multiplier").getAsFloat());
-                        armorItems.add(item);
+                        armorValues.put(item, entry.getValue().getAsFloat());
                     }
                 }
-            }
 
-            if (!armorItems.isEmpty()) {
-                ArmorInsulator.register(armorItems, values, mapRadiationTypes(element.getAsJsonObject()));
+                if (!armorValues.isEmpty()) {
+                    ArmorInsulator.register(armorValues, mapRadiationTypes(object.getAsJsonObject("radiation")));
+                }
             }
         }
     }

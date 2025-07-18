@@ -4,16 +4,13 @@ import net.minecraft.item.Item;
 import net.timeworndevs.curieapi.radiation.RadiationEntry;
 import net.timeworndevs.curieapi.radiation.RadiationType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 import static net.timeworndevs.curieapi.util.CurieAPIConfig.ARMOR_INSULATORS;
 
-public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multipliers, RadiationEntry radiations) {
-    public static List<String> pieceList = List.of("helmet", "chestplate", "leggings", "boots");
-
+public record ArmorInsulator (Map<Item, Float> armorItems, RadiationEntry radiations) {
     public boolean containsItem(Item item) {
-        return armorItems.contains(item);
+        return armorItems.containsKey(item);
     }
 
     public static ArmorInsulator findSetForItem(Item item) {
@@ -24,16 +21,12 @@ public record ArmorInsulator (ArrayList<Item> armorItems, ArrayList<Float> multi
     }
 
     public float getMultiplier(Item item) {
-        if (this.containsItem(item)) {
-            return this.multipliers.get(this.armorItems.indexOf(item));
-        }
-        return 0.0f;
+        return this.armorItems.getOrDefault(item, 0.0f);
     }
 
     // Creates a new armor insulator value
-    public static ArmorInsulator register(ArrayList<Item> armorItems, ArrayList<Float> multipliers, RadiationEntry radiations) {
-        ArmorInsulator insulator = new ArmorInsulator(armorItems, multipliers, radiations);
-
+    public static ArmorInsulator register(Map<Item, Float> armorItems, RadiationEntry radiations) {
+        ArmorInsulator insulator = new ArmorInsulator(armorItems, radiations);
         ARMOR_INSULATORS.add(insulator);
         return insulator;
 
