@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.timeworndevs.curieapi.util.CurieNBT;
 import net.timeworndevs.curieapi.util.IEntityDataSaver;
 import net.timeworndevs.curieapi.util.CurieAPIConfig;
 
@@ -13,25 +14,25 @@ public final class RadiationData {
 
     // Adds radiation to the player.
     public static void addRad(PlayerEntity player, RadiationType type, int amount) {
-        int rad = RadiationNBT.get((IEntityDataSaver) player, type.getName());
+        int rad = CurieNBT.getRadiation((IEntityDataSaver) player, type.getName());
         rad = Math.min(rad + amount, CurieAPIConfig.CAP);
 
-        RadiationNBT.set((IEntityDataSaver) player, type, rad);
+        CurieNBT.setRadiation((IEntityDataSaver) player, type, rad);
         syncRad(rad, type, player);
     }
 
     // Removes radiation from the player.
     public static void delRad(PlayerEntity player, RadiationType type, int amount) {
-        int rad = RadiationNBT.get((IEntityDataSaver) player, type.getName());
+        int rad = CurieNBT.getRadiation((IEntityDataSaver) player, type.getName());
         rad = Math.max(rad - amount, 0);
 
-        RadiationNBT.set((IEntityDataSaver) player, type, rad);
+        CurieNBT.setRadiation((IEntityDataSaver) player, type, rad);
         syncRad(rad, type, player);
     }
 
     // Sets the radiation of the player.
     public static void setRad(PlayerEntity player, RadiationType type, int rad) {
-        RadiationNBT.set((IEntityDataSaver) player, type, Math.min(rad, CurieAPIConfig.CAP));
+        CurieNBT.setRadiation((IEntityDataSaver) player, type, Math.min(rad, CurieAPIConfig.CAP));
         syncRad(rad, type, player);
     }
 

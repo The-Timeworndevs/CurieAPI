@@ -85,15 +85,14 @@ public class PlayerCache {
     }
 
     public void setBiomeRadiation(RadiationType type, float radiation) {
-        this.biomeRadiation.put(type, radiation);
+        this.biomeRadiation.getEntry().put(type, radiation);
     }
 
     public RadiationEntry getPrevBlockRadiation() {
         return this.blockRadiation;
     }
+
     public void setBlockRadiation(RadiationType type, float radiation) {
-        this.blockRadiation.put(type, radiation);
+        this.blockRadiation.getEntry().put(type, radiation);
     }
-
-
 }
