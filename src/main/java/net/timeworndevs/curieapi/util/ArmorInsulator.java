@@ -33,6 +33,6 @@ public record ArmorInsulator (Map<Item, Float> armorItems, RadiationEntry radiat
     }
 
     public float getRadiation(RadiationType type) {
-        return this.radiations.get(type);
+        return this.radiations.getEntry().get(type);
     }
 }

@@ -41,13 +41,13 @@ public class RadiationCalculator {
                 RadiationEntry radiationEntry = ITEM_RADIATION_VALUES.get(item);
                 if (radiationEntry != null) {
                     RadiationEntry finalEntry = entry;
-                    radiationEntry.entries().forEach((radiationType, value) -> finalEntry.add(radiationType, value * itemEntry.getValue()));
+                    radiationEntry.getEntry().forEach((radiationType, value) -> finalEntry.add(radiationType, value * itemEntry.getValue()));
                 }
             }
             cache.setItemRadiation(entry);
             cache.updateInventory();
         }
-        return Math.min(entry.get(type), MAX_ITEM_INTAKE);
+        return Math.min(entry.getEntry().getOrDefault(type, 0.0f), MAX_ITEM_INTAKE);
     }
     public static float calculateBiomeRadiation(ServerWorld world, ServerPlayerEntity player, RadiationType type, PlayerCache cache) {
         float biomeMultiplier = 0.0f;
@@ -59,7 +59,7 @@ public class RadiationCalculator {
 
             if (BIOME_RADIATION_VALUES.containsKey(biomeID)) {
                 // Check if biome is in BIOME_RADIATION_VALUES then adds a multiplier.
-                biomeMultiplier = BIOME_RADIATION_VALUES.get(biomeID).get(type);
+                biomeMultiplier = BIOME_RADIATION_VALUES.get(biomeID).getEntry().get(type);
                 cache.setBiomeRadiation(type, biomeMultiplier);
             }
             // If the player is in the overworld, also apply more radiation if exposed to skylight.
@@ -98,20 +98,20 @@ public class RadiationCalculator {
 
         BlockPos lastBlockPos = null;
         while (true) {
-            BlockHitResult result = raycastInsulator(new RaycastContext(start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player), (blockState) -> INSULATORS.containsKey(blockState.getBlock()) && INSULATORS.get(blockState.getBlock()).containsKey(type), lastBlockPos, world);
+            BlockHitResult result = raycastInsulator(new RaycastContext(start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player), (blockState) -> INSULATORS.containsKey(blockState.getBlock()) && INSULATORS.get(blockState.getBlock()).getEntry().containsKey(type), lastBlockPos, world);
             lastBlockPos = result.getBlockPos();
             if (lastBlockPos.equals(blockPos)) break;
 
             RadiationEntry entry = INSULATORS.get(world.getBlockState(lastBlockPos).getBlock());
             if (entry != null) {
-                totalInsulation += entry.get(type);
+                totalInsulation += entry.getEntry().get(type);
             }
             start = result.getPos();
         }
         return totalInsulation;
     }
 
-    // Calculates how many radioactive blocks are within an 11x11 box from the player.
+    // Calculates how many radioactive blocks are within a 11x11 box from the player.
     public static float calculateBlockRadiation(ServerWorld world, ServerPlayerEntity player, RadiationType type, PlayerCache cache) {
         float radiation = 0.0f;
         BlockPos corner1 = player.getBlockPos().add(-5, -5, -5);
@@ -121,7 +121,7 @@ public class RadiationCalculator {
             Block block = world.getBlockState(pos).getBlock();
             if (!block.equals(Blocks.AIR) && BLOCK_RADIATION_VALUES.containsKey(block)) {
                 float insulatorValue = calculateInsulators(world, player, type, pos);
-                radiation += Math.max(0, BLOCK_RADIATION_VALUES.get(block).get(type) - insulatorValue);
+                radiation += Math.max(0, BLOCK_RADIATION_VALUES.get(block).getEntry().get(type) - insulatorValue);
             }
         }
         radiation = Math.min(radiation, MAX_ITEM_INTAKE);
@@ -144,13 +144,13 @@ public class RadiationCalculator {
                 ArmorInsulator insulator = ArmorInsulator.findSetForItem(item);
                 // Checks if there is a valid insulator and if it can negate this type of radiation.
                 if (insulator != null) {
-                    insulator.radiations().entries().forEach((radiationType, value) -> entry.add(radiationType, value * insulator.getMultiplier(item) * 100));
+                    insulator.radiations().getEntry().forEach((radiationType, value) -> entry.add(radiationType, value * insulator.getMultiplier(item) * 100));
 
                 }
             }
             cache.updateArmor(armor, entry);
         }
-        armorProtection = cache.getArmorInsulation().get(type);
+        armorProtection = cache.getArmorInsulation().getEntry().getOrDefault(type, 0.0f);
         return Math.round(((radiationAround + radiationFromItems + biomeMultiplier) * (100 - Math.min(armorProtection, 100))) / DIV_CONSTANT);
     }
 }

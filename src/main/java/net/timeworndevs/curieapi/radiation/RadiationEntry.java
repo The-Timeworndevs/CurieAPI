@@ -3,38 +3,33 @@ package net.timeworndevs.curieapi.radiation;
 import java.util.HashMap;
 import java.util.Map;
 
-public record RadiationEntry(Map<RadiationType, Float> entries) {
+public class RadiationEntry extends AbstractRadiationEntry<Float>{
+    public RadiationEntry(Map<RadiationType, Float> entry) {
+        super(entry);
+    }
+
     public static RadiationEntry createEmpty() {
         return new RadiationEntry(new HashMap<>());
     }
 
-    public float get(RadiationType type) {
-        return this.entries.getOrDefault(type, 0.0f);
-    }
-    public void clear() {
-        this.entries.clear();
-    }
-
     public void add(RadiationType type, float value) {
-        this.put(type, this.get(type) + value);
+       entry.put(type, entry.get(type) + value);
     }
     public float addAllTypes() {
-        return this.entries.values().stream().reduce(0.0f, Float::sum);
-    }
-
-    public void put(RadiationType type, float value) {
-        this.entries.put(type, value);
+        return entry.values().stream().reduce(0.0f, Float::sum);
     }
 
     @Override
-    public String toString() {
-        return "RadiationEntry{" +
-                "entries=" + entries +
-                '}';
+    public boolean isWithin(AbstractRadiationEntry<?> other) {
+        if (other instanceof RadiationEntry same) {
+            for (RadiationType type : entry.keySet()) {
+                float value = same.getEntry().getOrDefault(type, 0.0f);
+                if (value < entry.get(type)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
-
-    public boolean containsKey(RadiationType type) {
-        return this.entries.containsKey(type);
-    }
-
 }

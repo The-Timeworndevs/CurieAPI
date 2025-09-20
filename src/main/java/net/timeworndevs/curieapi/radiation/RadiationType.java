@@ -8,6 +8,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.timeworndevs.curieapi.CurieAPI;
 import net.timeworndevs.curieapi.util.CurieAPIConfig;
+import net.timeworndevs.curieapi.util.CurieNBT;
 import net.timeworndevs.curieapi.util.IEntityDataSaver;
 
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class RadiationType {
                             PacketByteBuf buf, PacketSender responseSender) {
             int value = buf.readInt();
             if (client.player != null) {
-                RadiationNBT.set((IEntityDataSaver) client.player, this.radiationType, Math.min(value, CurieAPIConfig.CAP));
+                CurieNBT.setRadiation((IEntityDataSaver) client.player, this.radiationType, Math.min(value, CurieAPIConfig.CAP));
             }
         }
     }

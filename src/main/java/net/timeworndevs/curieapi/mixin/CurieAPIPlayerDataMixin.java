@@ -3,6 +3,7 @@ package net.timeworndevs.curieapi.mixin;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.timeworndevs.curieapi.CurieAPI;
 import net.timeworndevs.curieapi.util.IEntityDataSaver;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,10 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CurieAPIPlayerDataMixin implements IEntityDataSaver {
     @Unique
     private NbtCompound persistentData = new NbtCompound();
+
     @Unique
-    private static final String radiationData = CurieAPI.MOD_ID + ":radiation";
+    private static final String radiationData = CurieAPI.MOD_ID;
     @Override
     public NbtCompound CurieAPI$getPersistentData() {
+        persistentData.put("radiation", new NbtCompound());
+        persistentData.put("effect", new NbtList());
         return persistentData;
     }
 
