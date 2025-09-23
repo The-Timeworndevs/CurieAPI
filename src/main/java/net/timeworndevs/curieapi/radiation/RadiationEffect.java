@@ -40,7 +40,11 @@ public abstract class RadiationEffect<T extends AbstractRadiationEntry<?>> {
     public abstract void applyEffect(ServerPlayerEntity player, RadiationEntry types);
 
     public void updateEffects(ServerPlayerEntity player) {
-        CurieNBT.getEffectList((IEntityDataSaver) player).add(NbtString.of(id.toString()));
+        NbtList list = CurieNBT.getEffectList((IEntityDataSaver) player);
+        NbtString id = NbtString.of(this.id.toString());
+        if (!list.contains(id)) {
+            list.add(id);
+        }
     }
     public static Set<Identifier> getCurrentEffects(ServerPlayerEntity serverPlayerEntity) {
         NbtList effectsNbt = CurieNBT.getEffectList((IEntityDataSaver) serverPlayerEntity);

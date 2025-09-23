@@ -18,11 +18,17 @@ public abstract class CurieAPIPlayerDataMixin implements IEntityDataSaver {
     private NbtCompound persistentData = new NbtCompound();
 
     @Unique
+    private final NbtCompound RADIATION = new NbtCompound();
+
+    @Unique
+    private final NbtList EFFECTS = new NbtList();
+
+    @Unique
     private static final String radiationData = CurieAPI.MOD_ID;
     @Override
     public NbtCompound CurieAPI$getPersistentData() {
-        persistentData.put("radiation", new NbtCompound());
-        persistentData.put("effect", new NbtList());
+        persistentData.put("radiation", RADIATION);
+        persistentData.put("effect", EFFECTS);
         return persistentData;
     }
 
