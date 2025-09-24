@@ -45,6 +45,8 @@ public class RadiationType {
         return this.name;
     }
 
+    public String toString() { return name; }
+
     // Gets the syncing identifier of the radiation type.
     public Identifier getSyncID() {
         return this.syncID;
