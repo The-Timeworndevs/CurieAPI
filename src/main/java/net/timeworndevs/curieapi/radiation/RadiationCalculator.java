@@ -59,7 +59,7 @@ public class RadiationCalculator {
 
             if (BIOME_RADIATION_VALUES.containsKey(biomeID)) {
                 // Check if biome is in BIOME_RADIATION_VALUES then adds a multiplier.
-                biomeMultiplier = BIOME_RADIATION_VALUES.get(biomeID).getEntry().get(type);
+                biomeMultiplier = BIOME_RADIATION_VALUES.get(biomeID).getEntry().getOrDefault(type, 0.0f);
                 cache.setBiomeRadiation(type, biomeMultiplier);
             }
             // If the player is in the overworld, also apply more radiation if exposed to skylight.
